@@ -1,44 +1,37 @@
-// Room codes: "<building><sep><floor>.<room>", where the building is an HSWT code from the
-// site plan (A6, H10, C4 …). Accepted examples: "A6 1.12", "H10.E.07", "H10 0.07", "C4-1.03",
-// "D1 U.04", "F9 EG.12". Floor 0 / E / EG is the ground floor; U / UG / -1 is the basement.
+// HSWT room numbers: "<building>.<room>", e.g. "A6.301", "H10.215", "F9.410", "C4.204".
+// Also accepted: spaces or dashes instead of the dot ("a6 301", "H10-215") and building aliases
+// ("H9A.012"). The room part is kept as written; HSWT room numbers don't reliably encode the floor.
 
-const REST_RE = /^[\s.]*(EG|UG|E|U|-?\d)\s*\.?\s*(\d{1,3}[a-z]?)\s*$/i;
+// With a separator any room number is accepted ("A6.3"); without one ("A6301") it must have
+// three digits, so a bare "H10" stays building H10 instead of becoming room "H1.0".
+const ROOM_PART = /^([\s.\-]*)([a-z]?\d{1,4}[a-z]?(?:\.\d{1,3}[a-z]?)?)\s*$/i;
 
-function parseFloor(token) {
-  const f = token.toUpperCase();
-  if (f === 'E' || f === 'EG') return 0;
-  if (f === 'U' || f === 'UG') return -1;
-  return Number(f);
-}
-
-// `buildingIds`: known building codes, e.g. ["A1", "A10", "H10", …]
-export function parseRoomCode(input, buildingIds) {
+// `buildings`: [{ id, aliases? }]
+export function parseRoomCode(input, buildings) {
   const raw = String(input ?? '').trim().toUpperCase();
   if (!raw) return null;
-  // Longest code first so "A10 1.02" is building A10, not A1.
-  const ids = [...buildingIds].sort((a, b) => b.length - a.length);
-  for (const id of ids) {
-    if (!raw.startsWith(id.toUpperCase())) continue;
-    const m = REST_RE.exec(raw.slice(id.length));
-    if (!m) continue;
-    const floor = parseFloor(m[1]);
-    const room = m[2].padStart(2, '0');
-    return { building: id, floor, room, code: `${id} ${floor}.${room}` };
+  // Longest code first so "A10.201" is building A10, not A1.
+  const codes = buildings
+    .flatMap((b) => [b.id, ...(b.aliases ?? []).filter((a) => /^[A-Z]\d{1,2}[A-Z]?$/i.test(a))].map((code) => ({ code: code.toUpperCase(), id: b.id })))
+    .sort((a, b) => b.code.length - a.code.length);
+  for (const { code, id } of codes) {
+    if (!raw.startsWith(code)) continue;
+    const m = ROOM_PART.exec(raw.slice(code.length));
+    if (!m || (!m[1] && !/^\d{3}/.test(m[2]))) continue;
+    return { building: id, room: m[2], code: `${id}.${m[2]}` };
   }
   return null;
 }
 
-// Resolve a room code against a campus. Returns null when it isn't a room on this campus.
+// Resolve a room against a campus. Returns null when it isn't a room on this campus.
 export function locateRoom(input, campus) {
-  const parsed = parseRoomCode(input, campus.buildings.map((b) => b.id));
+  const parsed = parseRoomCode(input, campus.buildings);
   if (!parsed) return null;
-  const building = campus.buildings.find((b) => b.id === parsed.building);
-  const floorKnown = !building.floors || building.floors.includes(parsed.floor);
-  return { ...parsed, buildingRef: building, floorKnown };
+  return { ...parsed, buildingRef: campus.buildings.find((b) => b.id === parsed.building) };
 }
 
-// A plain building code ("H10", "a6") → building, so classes with only a building still navigate.
+// A plain building code ("H10", "a6", "H9A") → building, so classes with only a building still navigate.
 export function locateBuilding(input, campus) {
   const raw = String(input ?? '').trim().toUpperCase();
-  return campus.buildings.find((b) => b.id.toUpperCase() === raw) ?? null;
+  return campus.buildings.find((b) => b.id.toUpperCase() === raw || (b.aliases ?? []).some((a) => a.toUpperCase() === raw)) ?? null;
 }

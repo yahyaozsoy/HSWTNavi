@@ -7,28 +7,38 @@ const STRINGS = {
     'app.title': 'HSWT Navigator',
     'tab.map': 'Karte',
     'tab.today': 'Heute',
+    'tab.mensa': 'Mensa',
     'tab.campus': 'Campus',
-    'search.placeholder': 'Raum (z. B. A6 1.12), Gebäude, Mensa, Bus …',
+    'search.placeholder': 'Raum (z. B. A6.301), Person, Mensa …',
     'search.label': 'Campus durchsuchen',
+    'search.clear': 'Suche löschen',
+    'search.recent': 'Zuletzt gesucht',
+    'search.favorites': 'Gemerkt',
+    'search.none': 'Nichts gefunden. Tipp: Raumnummer wie „D1.436“ oder einen Nachnamen eingeben.',
     'locate.title': 'Meinen Standort zeigen',
     'close': 'Schließen',
 
+    'chip.mensa': 'Mensa',
+    'chip.library': 'Bibliothek',
+    'chip.studentService': 'Student.Service',
+    'chip.cafe': 'Café',
+    'chip.station': 'Bahnhof',
+    'chip.people': 'Professor:innen',
+
     'kind.building': 'Gebäude',
-    'kind.food': 'Essen',
+    'kind.food': 'Essen & Trinken',
     'kind.transit': 'Haltestelle',
     'kind.residence': 'Wohnheim',
     'kind.service': 'Einrichtung',
+    'kind.community': 'Gemeinde',
     'kind.parking': 'Parkplatz',
+    'kind.person': 'Büro',
+    'kind.contact': 'Mein Kontakt',
     'kind.class': 'Deine Lehrveranstaltung',
+    'kind.room': 'Raum',
 
-    'building.name': 'Gebäude {code}',
-    'building.generic': 'HSWT-Gebäude',
     'room.title': 'Raum {code}',
-    'room.floorUnknown': '(Stockwerk nicht hinterlegt)',
-    'floor.ground': 'Erdgeschoss',
-    'floor.basement': 'Untergeschoss',
-    'floor.basementN': '{n}. Untergeschoss',
-    'floor.upper': '{n}. Obergeschoss',
+    'room.hint': 'Raum {room} liegt im Gebäude {building}. Die Raumnummern stehen an den Türen; im Gebäude hängen Übersichtspläne.',
 
     'status.open': 'Geöffnet · bis {time} Uhr',
     'status.closedOpens': 'Geschlossen · öffnet {day} {time} Uhr',
@@ -40,6 +50,9 @@ const STRINGS = {
     'route.go': 'Route hierher',
     'route.myLocation': 'Mein Standort',
     'route.station': 'Bahnhof Freising',
+    'route.group.start': 'Startpunkt',
+    'route.group.buildings': 'Gebäude',
+    'route.group.other': 'Weitere Orte',
     'route.loading': 'Route wird berechnet …',
     'route.summary': '{min} Min. zu Fuß · {dist}',
     'route.stepFree': 'Barrierefreie Route (ohne Treppen)',
@@ -49,14 +62,59 @@ const STRINGS = {
     'route.steps': 'Wegbeschreibung',
     'route.attribution': 'Routing: {provider} · Daten © OpenStreetMap',
     'route.none': 'Keine Route gefunden.',
+    'route.arrive': 'Ziel: {target}',
 
-    'sheet.menu': 'Speiseplan heute',
-    'sheet.menuLoading': 'Speiseplan wird geladen …',
-    'sheet.menuNone': 'Für heute ist kein Speiseplan veröffentlicht.',
-    'sheet.menuError': 'Speiseplan nicht erreichbar.',
+    'sheet.address': 'Adresse',
+    'sheet.room': 'Raum',
+    'sheet.hours': 'Öffnungszeiten',
+    'sheet.phone': 'Telefon',
+    'sheet.email': 'E-Mail',
+    'sheet.website': 'Mehr auf hswt.de',
+    'sheet.profile': 'Profil & Sprechzeiten auf hswt.de',
+    'sheet.share': 'Teilen',
+    'sheet.copied': 'Link kopiert',
+    'sheet.save': 'Merken',
+    'sheet.saved': 'Gemerkt',
+    'sheet.inside': 'Hier zu finden',
+    'sheet.people': 'Büros in diesem Gebäude',
+    'sheet.source': 'Quelle: hswt.de, Stand {date}',
+    'sheet.positionPlan': 'Lage nach HSWT-Lageplan (kein OpenStreetMap-Umriss vorhanden).',
     'sheet.hoursSource': 'Öffnungszeiten laut Studierendenwerk (eat-api)',
-    'sheet.notStepFree': '⚠ Barrierefreiheit nicht bestätigt – im Zweifel beim Gebäudeservice nachfragen.',
-    'sheet.departures': 'Abfahrten',
+    'sheet.todayMenu': 'Heute in der Mensa',
+    'sheet.fullMenu': 'Ganzer Speiseplan',
+    'sheet.menuNone': 'Heute kein Speiseplan veröffentlicht.',
+    'sheet.removeContact': 'Kontakt löschen',
+
+    'mensa.title': 'Speiseplan',
+    'mensa.loading': 'Speiseplan wird geladen …',
+    'mensa.error': 'Speiseplan nicht erreichbar. Bitte später erneut versuchen.',
+    'mensa.none': 'Für diesen Tag ist kein Speiseplan veröffentlicht.',
+    'mensa.noMatch': 'Keine Gerichte für diesen Filter.',
+    'mensa.price': 'Preis für',
+    'mensa.role.students': 'Studierende',
+    'mensa.role.staff': 'Bedienstete',
+    'mensa.role.guests': 'Gäste',
+    'mensa.diet.all': 'Alle',
+    'mensa.diet.vegetarian': 'Vegetarisch',
+    'mensa.diet.vegan': 'Vegan',
+    'mensa.diet.nopork': 'Ohne Schwein',
+    'mensa.dietLabel.vegan': 'vegan',
+    'mensa.dietLabel.vegetarian': 'vegetarisch',
+    'mensa.dietLabel.fish': 'Fisch',
+    'mensa.dietLabel.meat': 'Fleisch',
+    'mensa.allergens': 'Allergene',
+    'mensa.additives': 'Zusatzstoffe',
+    'mensa.quality': 'Qualität',
+    'mensa.details': 'Allergene & Zusatzstoffe',
+    'mensa.warn': '⚠ Enthält {list}',
+    'mensa.myAllergens': 'Meine Allergene',
+    'mensa.myAllergensHelp': 'Gerichte mit diesen Allergenen werden markiert.',
+    'mensa.hideConflicts': 'Markierte Gerichte ausblenden',
+    'mensa.thisWeek': 'Diese Woche',
+    'mensa.nextWeek': 'Nächste Woche',
+    'mensa.today': 'heute',
+    'mensa.source': 'Daten: Studierendenwerk München Oberbayern via TUM-Dev eat-api. Angaben ohne Gewähr – maßgeblich ist der Aushang in der Mensa.',
+    'mensa.showOnMap': 'Auf der Karte',
 
     'today.next': 'Nächste Veranstaltung',
     'today.current': 'Aktuelle Veranstaltung',
@@ -75,6 +133,7 @@ const STRINGS = {
     'today.heading': 'Heute',
     'today.nothing': 'Heute steht nichts an.',
     'today.until': 'bis {time}',
+    'today.lunch': 'Mittagspause? Heute in der Mensa: {dish}',
     'timetable.heading': 'Mein Stundenplan',
     'timetable.empty': 'Noch keine Veranstaltungen.',
     'timetable.remove': '{title} entfernen',
@@ -92,21 +151,42 @@ const STRINGS = {
     'ics.imported': '{n} Veranstaltung(en) importiert.',
     'ics.none': 'Keine Termine in dieser Datei gefunden.',
 
+    'campus.saved': 'Meine Orte',
+    'campus.savedEmpty': 'Tippe bei einem Ort auf ☆ Merken, damit er hier erscheint.',
     'campus.openNow': 'Essen & Trinken',
-    'campus.services': 'Einrichtungen & Dekanate',
+    'campus.services': 'Anlaufstellen',
+    'campus.people': 'Professor:innen',
+    'campus.peopleHelp': 'Büros laut Profilseiten auf hswt.de (Stand {date}). Sprechzeiten stehen im jeweiligen Profil.',
+    'campus.contacts': 'Meine Kontakte',
     'campus.buildings': 'Alle Gebäude',
     'campus.settings': 'Einstellungen',
+    'contact.add': 'Büro hinzufügen',
+    'contact.help': 'Fehlt jemand? Schlage den Raum im HSWT-Personenverzeichnis nach und speichere ihn hier – dann findest du ihn in der Suche.',
+    'contact.directory': 'Personenverzeichnis öffnen',
+    'contact.name': 'Name',
+    'contact.room': 'Raum (z. B. D1.436)',
+    'contact.note': 'Notiz, z. B. Sprechstunde Di 10–11',
+    'contact.submit': 'Speichern',
+    'contact.badRoom': 'Raum „{room}“ gibt es auf dem Lageplan nicht. Format: Gebäude.Raum, z. B. D1.436',
     'settings.stepFree': 'Barrierefreie Routen (ohne Treppen)',
     'settings.buffer': 'Minuten früher ankommen',
     'settings.language': 'Sprache',
+    'settings.reset': 'Einführung erneut zeigen',
     'about.data':
-      'Gebäude: offizieller HSWT-Lageplan, georeferenziert (typische Abweichung ca. {err} m). Karte & Wege © OpenStreetMap-Mitwirkende. Routing: FOSSGIS Valhalla/OSRM. Haltestellen: DELFI/MVV. Mensa: Studierendenwerk via TUM-Dev eat-api.',
+      'Gebäude: OpenStreetMap-Umrisse, zugeordnet über den offiziellen HSWT-Lageplan. Büros & Anlaufstellen: hswt.de (Stand {date}). Routing: FOSSGIS Valhalla/OSRM. Haltestellen: DELFI/MVV. Mensa: Studierendenwerk via TUM-Dev eat-api.',
+
+    'welcome.title': 'Willkommen beim HSWT Navigator',
+    'welcome.search': 'Suche einen Raum (z. B. A6.301), eine Professorin oder die Mensa.',
+    'welcome.route': 'Tippe auf „Route hierher“ – die App führt dich zu Fuß hin.',
+    'welcome.today': 'Unter „Heute“ siehst du deine nächste Vorlesung und wann du losmusst.',
+    'welcome.ok': 'Los geht’s',
 
     'toast.near': 'Du bist bei {name}',
     'toast.notOnCampus': 'Du bist gerade nicht auf dem Campus.',
     'toast.noGeo': 'Standort ist auf diesem Gerät nicht verfügbar.',
     'toast.geoDenied': 'Standort nicht verfügbar – bitte Berechtigung prüfen.',
     'toast.classNoRoom': 'Für diese Veranstaltung ist kein Raum auf dem Campus hinterlegt.',
+    'toast.contactSaved': '{name} gespeichert – jetzt in der Suche zu finden.',
     'map.offline': 'Karte offline nicht verfügbar. Suche und Stundenplan funktionieren trotzdem.',
     'countdown.now': 'jetzt',
     'countdown.min': 'in {n} Min.',
@@ -119,28 +199,38 @@ const STRINGS = {
     'app.title': 'HSWT Navigator',
     'tab.map': 'Map',
     'tab.today': 'Today',
+    'tab.mensa': 'Mensa',
     'tab.campus': 'Campus',
-    'search.placeholder': 'Room (e.g. A6 1.12), building, Mensa, bus …',
+    'search.placeholder': 'Room (e.g. A6.301), person, Mensa …',
     'search.label': 'Search campus',
+    'search.clear': 'Clear search',
+    'search.recent': 'Recent',
+    'search.favorites': 'Saved',
+    'search.none': 'Nothing found. Tip: enter a room number like "D1.436" or a surname.',
     'locate.title': 'Show my location',
     'close': 'Close',
 
+    'chip.mensa': 'Mensa',
+    'chip.library': 'Library',
+    'chip.studentService': 'Student.Service',
+    'chip.cafe': 'Café',
+    'chip.station': 'Station',
+    'chip.people': 'Professors',
+
     'kind.building': 'Building',
-    'kind.food': 'Food',
+    'kind.food': 'Food & drink',
     'kind.transit': 'Bus stop',
     'kind.residence': 'Residence hall',
-    'kind.service': 'Facility',
+    'kind.service': 'Office',
+    'kind.community': 'Community',
     'kind.parking': 'Car park',
+    'kind.person': 'Office',
+    'kind.contact': 'My contact',
     'kind.class': 'Your class',
+    'kind.room': 'Room',
 
-    'building.name': 'Building {code}',
-    'building.generic': 'HSWT building',
     'room.title': 'Room {code}',
-    'room.floorUnknown': '(floor not on record)',
-    'floor.ground': 'ground floor',
-    'floor.basement': 'basement',
-    'floor.basementN': 'basement {n}',
-    'floor.upper': '{n}{suffix} floor',
+    'room.hint': 'Room {room} is in building {building}. Room numbers are on the doors; each building has floor plans at the entrance.',
 
     'status.open': 'Open · closes {time}',
     'status.closedOpens': 'Closed · opens {day} {time}',
@@ -152,6 +242,9 @@ const STRINGS = {
     'route.go': 'Route here',
     'route.myLocation': 'My location',
     'route.station': 'Freising station',
+    'route.group.start': 'Start',
+    'route.group.buildings': 'Buildings',
+    'route.group.other': 'Other places',
     'route.loading': 'Calculating route …',
     'route.summary': '{min} min walk · {dist}',
     'route.stepFree': 'Step-free route (no stairs)',
@@ -161,14 +254,59 @@ const STRINGS = {
     'route.steps': 'Directions',
     'route.attribution': 'Routing: {provider} · Data © OpenStreetMap',
     'route.none': 'No route found.',
+    'route.arrive': 'Destination: {target}',
 
-    'sheet.menu': "Today's menu",
-    'sheet.menuLoading': 'Loading menu …',
-    'sheet.menuNone': 'No menu published for today.',
-    'sheet.menuError': 'Menu unavailable.',
+    'sheet.address': 'Address',
+    'sheet.room': 'Room',
+    'sheet.hours': 'Opening hours',
+    'sheet.phone': 'Phone',
+    'sheet.email': 'Email',
+    'sheet.website': 'More on hswt.de',
+    'sheet.profile': 'Profile & office hours on hswt.de',
+    'sheet.share': 'Share',
+    'sheet.copied': 'Link copied',
+    'sheet.save': 'Save',
+    'sheet.saved': 'Saved',
+    'sheet.inside': 'Inside',
+    'sheet.people': 'Offices in this building',
+    'sheet.source': 'Source: hswt.de, as of {date}',
+    'sheet.positionPlan': 'Position from the HSWT site plan (no OpenStreetMap outline available).',
     'sheet.hoursSource': 'Opening hours from Studierendenwerk (eat-api)',
-    'sheet.notStepFree': '⚠ Step-free access not confirmed – check with building services if in doubt.',
-    'sheet.departures': 'Departures',
+    'sheet.todayMenu': 'Today at the Mensa',
+    'sheet.fullMenu': 'Full menu',
+    'sheet.menuNone': 'No menu published for today.',
+    'sheet.removeContact': 'Delete contact',
+
+    'mensa.title': 'Menu',
+    'mensa.loading': 'Loading menu …',
+    'mensa.error': 'Menu unavailable. Please try again later.',
+    'mensa.none': 'No menu published for this day.',
+    'mensa.noMatch': 'No dishes match this filter.',
+    'mensa.price': 'Prices for',
+    'mensa.role.students': 'Students',
+    'mensa.role.staff': 'Staff',
+    'mensa.role.guests': 'Guests',
+    'mensa.diet.all': 'All',
+    'mensa.diet.vegetarian': 'Vegetarian',
+    'mensa.diet.vegan': 'Vegan',
+    'mensa.diet.nopork': 'No pork',
+    'mensa.dietLabel.vegan': 'vegan',
+    'mensa.dietLabel.vegetarian': 'vegetarian',
+    'mensa.dietLabel.fish': 'fish',
+    'mensa.dietLabel.meat': 'meat',
+    'mensa.allergens': 'Allergens',
+    'mensa.additives': 'Additives',
+    'mensa.quality': 'Quality',
+    'mensa.details': 'Allergens & additives',
+    'mensa.warn': '⚠ Contains {list}',
+    'mensa.myAllergens': 'My allergens',
+    'mensa.myAllergensHelp': 'Dishes with these allergens are flagged.',
+    'mensa.hideConflicts': 'Hide flagged dishes',
+    'mensa.thisWeek': 'This week',
+    'mensa.nextWeek': 'Next week',
+    'mensa.today': 'today',
+    'mensa.source': 'Data: Studierendenwerk München Oberbayern via TUM-Dev eat-api. No guarantee – the notice at the Mensa is authoritative.',
+    'mensa.showOnMap': 'On the map',
 
     'today.next': 'Next class',
     'today.current': 'Current class',
@@ -187,6 +325,7 @@ const STRINGS = {
     'today.heading': 'Today',
     'today.nothing': 'Nothing scheduled today.',
     'today.until': 'until {time}',
+    'today.lunch': 'Lunch break? At the Mensa today: {dish}',
     'timetable.heading': 'My timetable',
     'timetable.empty': 'No classes yet.',
     'timetable.remove': 'Remove {title}',
@@ -204,21 +343,42 @@ const STRINGS = {
     'ics.imported': 'Imported {n} class(es).',
     'ics.none': 'No events found in that file.',
 
+    'campus.saved': 'My places',
+    'campus.savedEmpty': 'Tap ☆ Save on a place to keep it here.',
     'campus.openNow': 'Food & drink',
-    'campus.services': 'Facilities & dean’s offices',
+    'campus.services': 'Where to go for help',
+    'campus.people': 'Professors',
+    'campus.peopleHelp': 'Offices from the profile pages on hswt.de (as of {date}). Office hours are on each profile.',
+    'campus.contacts': 'My contacts',
     'campus.buildings': 'All buildings',
     'campus.settings': 'Settings',
+    'contact.add': 'Add an office',
+    'contact.help': 'Someone missing? Look up their room in the HSWT person directory and save it here – then search finds it.',
+    'contact.directory': 'Open person directory',
+    'contact.name': 'Name',
+    'contact.room': 'Room (e.g. D1.436)',
+    'contact.note': 'Note, e.g. office hour Tue 10–11',
+    'contact.submit': 'Save',
+    'contact.badRoom': 'Room "{room}" is not on the site plan. Format: building.room, e.g. D1.436',
     'settings.stepFree': 'Step-free routes (avoid stairs)',
     'settings.buffer': 'Minutes to arrive early',
     'settings.language': 'Language',
+    'settings.reset': 'Show introduction again',
     'about.data':
-      'Buildings: official HSWT site plan, georeferenced (typical error approx. {err} m). Map & paths © OpenStreetMap contributors. Routing: FOSSGIS Valhalla/OSRM. Stops: DELFI/MVV. Mensa: Studierendenwerk via TUM-Dev eat-api.',
+      'Buildings: OpenStreetMap outlines, matched via the official HSWT site plan. Offices: hswt.de (as of {date}). Routing: FOSSGIS Valhalla/OSRM. Stops: DELFI/MVV. Mensa: Studierendenwerk via TUM-Dev eat-api.',
+
+    'welcome.title': 'Welcome to HSWT Navigator',
+    'welcome.search': 'Search for a room (e.g. A6.301), a professor or the Mensa.',
+    'welcome.route': 'Tap "Route here" – the app walks you there.',
+    'welcome.today': 'Under "Today" you see your next class and when to leave.',
+    'welcome.ok': "Let's go",
 
     'toast.near': "You're near {name}",
     'toast.notOnCampus': "You're not on campus right now.",
     'toast.noGeo': 'Location is not available on this device.',
     'toast.geoDenied': 'Could not get your location. Check location permissions.',
     'toast.classNoRoom': 'This class has no room on campus yet.',
+    'toast.contactSaved': '{name} saved – search finds them now.',
     'map.offline': 'Map unavailable offline. Search and timetable still work.',
     'countdown.now': 'now',
     'countdown.min': 'in {n} min',
@@ -238,6 +398,12 @@ export function detectLanguage(stored, navigatorLanguages = []) {
   return 'de';
 }
 
+export function hasAllKeys() {
+  const de = Object.keys(STRINGS.de);
+  const en = Object.keys(STRINGS.en);
+  return { missingInEn: de.filter((k) => !(k in STRINGS.en)), missingInDe: en.filter((k) => !(k in STRINGS.de)) };
+}
+
 export function createI18n(lang) {
   const dict = STRINGS[lang] ?? STRINGS.de;
   const locale = lang === 'de' ? 'de-DE' : 'en-GB';
@@ -249,15 +415,6 @@ export function createI18n(lang) {
 
   // Pick the right language from a { de, en } object (or pass strings through).
   const pick = (value) => (value && typeof value === 'object' ? value[lang] ?? value.de ?? value.en : value ?? '');
-
-  const ordinal = (n) => (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
-
-  function floor(n) {
-    if (n === 0) return t('floor.ground');
-    if (n === -1) return t('floor.basement');
-    if (n < 0) return t('floor.basementN', { n: -n });
-    return t('floor.upper', { n, suffix: ordinal(n) });
-  }
 
   function countdown(ms) {
     const totalMin = Math.round(ms / 60000);
@@ -274,6 +431,8 @@ export function createI18n(lang) {
   const weekdayShortFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   // 2026-10-04 is a Sunday; index 0 = Sunday like Date#getDay().
   const weekday = (d, short = false) => (short ? weekdayShortFmt : weekdayFmt).format(new Date(2026, 9, 4 + d));
+  const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'numeric' });
+  const shortDate = (d) => dayMonth.format(d);
 
   function openingStatus(status) {
     if (!status.known) return '';
@@ -286,8 +445,29 @@ export function createI18n(lang) {
     return t('status.closed');
   }
 
+  // Weekly hours → ["Mo 08:00–12:00", "Mi 10:00–15:00", …], merging days with identical hours.
+  function weeklyHours(hours) {
+    const lines = [];
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    const fmt = (ranges) => ranges.map(([a, b]) => `${a}–${b}`).join(', ');
+    let i = 0;
+    while (i < order.length) {
+      const d = order[i];
+      if (!hours?.[d]) {
+        i++;
+        continue;
+      }
+      let j = i;
+      while (j + 1 < order.length && hours[order[j + 1]] && fmt(hours[order[j + 1]]) === fmt(hours[d])) j++;
+      const days = j > i ? `${weekday(d, true)}–${weekday(order[j], true)}` : weekday(d, true);
+      lines.push(`${days} ${fmt(hours[d])}`);
+      i = j + 1;
+    }
+    return lines;
+  }
+
   const time = (d) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   const distance = (m) => (m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} km`);
 
-  return { lang, locale, t, pick, floor, countdown, weekday, openingStatus, time, distance };
+  return { lang, locale, t, pick, countdown, weekday, shortDate, openingStatus, weeklyHours, time, distance };
 }

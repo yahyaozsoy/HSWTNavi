@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#00653a" />
-    <meta name="description" content="Räume, deine nächste Vorlesung und Campus-Services der HSWT finden." />
+    <meta name="description" content="Räume, Büros, die Mensa und deine nächste Vorlesung an der HSWT finden." />
     <title>HSWT Navigator</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
@@ -39,19 +39,35 @@
       <!-- MAP -->
       <section id="view-map" class="view active" data-i18n-aria="tab.map">
         <div class="search">
-          <input
-            id="search-input"
-            type="search"
-            autocomplete="off"
-            data-i18n-placeholder="search.placeholder"
-            data-i18n-aria="search.label"
-          />
+          <div class="search-box">
+            <input
+              id="search-input"
+              type="search"
+              autocomplete="off"
+              enterkeyhint="search"
+              data-i18n-placeholder="search.placeholder"
+              data-i18n-aria="search.label"
+            />
+            <button id="search-clear" class="search-clear" type="button" hidden data-i18n-aria="search.clear">×</button>
+          </div>
+          <div id="chips" class="chips" role="toolbar"></div>
           <ul id="search-results" class="search-results" role="listbox" hidden></ul>
         </div>
         <div id="map" role="application" data-i18n-aria="tab.map"></div>
         <button id="locate-btn" class="fab" data-i18n-title="locate.title" data-i18n-aria="locate.title">◎</button>
 
-        <div id="sheet" class="sheet" hidden>
+        <div id="welcome" class="sheet welcome" hidden>
+          <h3 data-i18n="welcome.title"></h3>
+          <ol class="welcome-steps">
+            <li data-i18n="welcome.search"></li>
+            <li data-i18n="welcome.route"></li>
+            <li data-i18n="welcome.today"></li>
+          </ol>
+          <button id="welcome-ok" class="btn primary wide" data-i18n="welcome.ok"></button>
+        </div>
+
+        <div id="sheet" class="sheet" hidden role="dialog" aria-live="polite">
+          <button id="sheet-handle" class="sheet-handle" type="button" aria-hidden="true" tabindex="-1"></button>
           <button id="sheet-close" class="sheet-close" data-i18n-aria="close">×</button>
           <div id="sheet-body"></div>
         </div>
@@ -60,6 +76,7 @@
       <!-- TODAY -->
       <section id="view-today" class="view" data-i18n-aria="tab.today">
         <div id="next-card" class="card next-card"></div>
+        <div id="lunch-card" class="card lunch-card" hidden></div>
         <h2 data-i18n="today.heading"></h2>
         <ul id="today-list" class="list"></ul>
 
@@ -70,7 +87,7 @@
           <summary data-i18n="form.add"></summary>
           <form id="class-form" class="form">
             <label><span data-i18n="form.course"></span> <input name="title" required /></label>
-            <label><span data-i18n="form.room"></span> <input name="room" placeholder="A6 1.12" /></label>
+            <label><span data-i18n="form.room"></span> <input name="room" placeholder="A6.301" /></label>
             <label><span data-i18n="form.day"></span> <select name="day" id="day-select"></select></label>
             <div class="row">
               <label><span data-i18n="form.from"></span> <input name="start" type="time" required value="08:15" /></label>
@@ -88,13 +105,60 @@
         </details>
       </section>
 
+      <!-- MENSA -->
+      <section id="view-mensa" class="view" data-i18n-aria="tab.mensa">
+        <div class="mensa-head">
+          <div>
+            <h2 class="flush" data-i18n="mensa.title"></h2>
+            <div id="mensa-status" class="status"></div>
+          </div>
+          <button id="mensa-map" class="btn" data-i18n="mensa.showOnMap"></button>
+        </div>
+        <div id="mensa-days" class="day-tabs" role="tablist"></div>
+        <div class="mensa-filters">
+          <div id="mensa-diet" class="segmented" role="group"></div>
+          <label class="inline-select"
+            ><span data-i18n="mensa.price"></span>
+            <select id="mensa-role"></select>
+          </label>
+        </div>
+        <div id="mensa-list" aria-live="polite"></div>
+        <details class="card">
+          <summary data-i18n="mensa.myAllergens"></summary>
+          <p class="muted" data-i18n="mensa.myAllergensHelp"></p>
+          <div id="allergen-picker" class="check-grid"></div>
+          <label class="switch"><input id="hide-conflicts" type="checkbox" /> <span data-i18n="mensa.hideConflicts"></span></label>
+        </details>
+        <p class="muted small" data-i18n="mensa.source"></p>
+      </section>
+
       <!-- CAMPUS -->
       <section id="view-campus" class="view" data-i18n-aria="tab.campus">
-        <h2 data-i18n="campus.openNow"></h2>
-        <ul id="food-list" class="list"></ul>
+        <h2 data-i18n="campus.saved"></h2>
+        <ul id="saved-list" class="list"></ul>
 
         <h2 data-i18n="campus.services"></h2>
         <ul id="services-list" class="list"></ul>
+
+        <h2 data-i18n="campus.openNow"></h2>
+        <ul id="food-list" class="list"></ul>
+
+        <h2 data-i18n="campus.people"></h2>
+        <p id="people-help" class="muted small"></p>
+        <div id="people-list"></div>
+
+        <h2 data-i18n="campus.contacts"></h2>
+        <ul id="contacts-list" class="list"></ul>
+        <details class="card">
+          <summary data-i18n="contact.add"></summary>
+          <p class="muted small"><span data-i18n="contact.help"></span> <a id="directory-link" target="_blank" rel="noopener" data-i18n="contact.directory"></a></p>
+          <form id="contact-form" class="form">
+            <label><span data-i18n="contact.name"></span> <input name="name" required /></label>
+            <label><span data-i18n="contact.room"></span> <input name="room" required placeholder="D1.436" /></label>
+            <label><span data-i18n="contact.note"></span> <input name="note" /></label>
+            <button type="submit" class="btn primary" data-i18n="contact.submit"></button>
+          </form>
+        </details>
 
         <h2 data-i18n="campus.buildings"></h2>
         <ul id="buildings-list" class="list compact"></ul>
@@ -109,6 +173,7 @@
             <input id="buffer-min" type="number" min="0" max="30" value="3" />
             <span data-i18n="settings.buffer"></span>
           </label>
+          <button id="reset-welcome" class="btn ghost" type="button" data-i18n="settings.reset"></button>
         </div>
         <p id="about-data" class="muted small"></p>
       </section>
@@ -117,6 +182,7 @@
     <nav class="tabbar">
       <button data-view="map" class="active"><span aria-hidden="true">⌖</span><b data-i18n="tab.map"></b></button>
       <button data-view="today"><span aria-hidden="true">◷</span><b data-i18n="tab.today"></b></button>
+      <button data-view="mensa"><span aria-hidden="true">🍴</span><b data-i18n="tab.mensa"></b></button>
       <button data-view="campus"><span aria-hidden="true">☰</span><b data-i18n="tab.campus"></b></button>
     </nav>
 

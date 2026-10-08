@@ -7,60 +7,78 @@ import { distanceMeters, estimateWalk, nearest } from '../js/lib/routing.js';
 import { openingStatus } from '../js/lib/hours.js';
 import { nextEvent, eventsOn, leaveBy, parseIcs } from '../js/lib/schedule.js';
 import { search, normalize } from '../js/lib/search.js';
-import { createI18n, detectLanguage } from '../js/lib/i18n.js';
+import { createI18n, detectLanguage, hasAllKeys } from '../js/lib/i18n.js';
 
 const ws = getCampus('weihenstephan');
 const de = createI18n('de');
 const en = createI18n('en');
 const ids = ws.buildings.map((b) => b.id);
 
-test('campus has every building from the site plan', () => {
+test('campus has every building from the site plan plus OSM extras', () => {
   const expected = [
     'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11',
     'C4', 'C5', 'C6', 'D1', 'F9', 'F10',
-    'H1', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H14', 'H19', 'H20', 'H21',
+    'H1', 'H3', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H14', 'H19', 'H20', 'H21',
   ];
   assert.deepEqual([...ids].sort(), [...expected].sort());
   for (const b of ws.buildings) {
     const [lat, lng] = b.latlng;
     assert.ok(lat > 48.39 && lat < 48.41 && lng > 11.71 && lng < 11.74, `${b.id} lies on the Weihenstephan hill`);
+    assert.ok(['osm', 'osm-matched', 'plan'].includes(b.source), b.id);
   }
-  // Dean's offices and services from the plan legend carry a description.
-  for (const id of ['A3', 'A5', 'A6', 'A8', 'C4', 'D1', 'F9', 'H10']) {
-    assert.ok(ws.buildings.find((b) => b.id === id).description, `${id} has a description`);
-  }
+  // Almost every building uses a real OpenStreetMap footprint.
+  assert.ok(ws.buildings.filter((b) => b.source !== 'plan').length >= 28);
+  // Offices from hswt.de show up as building contents.
+  assert.deepEqual(ws.buildings.find((b) => b.id === 'A6').services, ['student-service', 'studienberatung']);
+  assert.equal(ws.buildings.find((b) => b.id === 'C5').address, 'Vöttinger Str. 27, 85354 Freising');
+  assert.ok(ws.buildings.find((b) => b.id === 'H9').aliases.includes('H9A'));
 });
 
-test('georeferencing matches independent surveyed coordinates', () => {
-  assert.ok(ws.georeference.medianErrorM < 10, `median error ${ws.georeference.medianErrorM} m`);
-  assert.ok(ws.georeference.matchedBuildings >= 50);
+test('building positions agree with independent surveyed coordinates', () => {
+  // NavigaTUM 4176 "A1 Hochschule Freising-Triesdorf" lies in the A-building cluster.
+  const a1 = ws.buildings.find((b) => b.id === 'A1');
+  assert.ok(distanceMeters(a1.latlng, [48.395878, 11.730308]) < 60);
   // Hochschulgemeinde – NavigaTUM building 4299.
   const hsg = ws.pois.find((p) => p.id === 'hsg');
   assert.ok(distanceMeters(hsg.latlng, [48.397678, 11.720478]) < 15);
-  // Building A9 is the Kustermannhalle; HSWT A1 – NavigaTUM 4176 – lies in the A-building cluster.
-  const a1 = ws.buildings.find((b) => b.id === 'A1');
-  assert.ok(distanceMeters(a1.latlng, [48.395878, 11.730308]) < 60);
   // Freising station (DELFI stop) vs. Wikipedia 48°23′43″N 11°44′39″E.
   assert.ok(distanceMeters(ws.station, [48.39528, 11.74417]) < 30);
+  // The schematic site plan put H11 ~70 m off; the OSM footprint fixes that.
+  const h11 = ws.buildings.find((b) => b.id === 'H11');
+  assert.ok(distanceMeters(h11.latlng, [48.40176, 11.73189]) < 25);
 });
 
-test('room codes parse against known building codes', () => {
-  assert.deepEqual(parseRoomCode('A6 1.12', ids), { building: 'A6', floor: 1, room: '12', code: 'A6 1.12' });
-  assert.equal(parseRoomCode('h10.e.07', ids).code, 'H10 0.07');
-  assert.equal(parseRoomCode('H10 EG.7', ids).code, 'H10 0.07');
-  assert.equal(parseRoomCode('C4-1.03', ids).floor, -1);
-  assert.equal(parseRoomCode('D1 U.04', ids).floor, -1);
-  assert.equal(parseRoomCode('A10 2.01', ids).building, 'A10'); // longest code wins
-  assert.equal(parseRoomCode('A1 2.01', ids).building, 'A1');
-  assert.equal(parseRoomCode('Z9 1.01', ids), null);
-  assert.equal(parseRoomCode('Mensa', ids), null);
-  assert.equal(parseRoomCode('', ids), null);
+test('HSWT room numbers parse against known building codes', () => {
+  const bs = ws.buildings;
+  assert.deepEqual(parseRoomCode('A6.301', bs), { building: 'A6', room: '301', code: 'A6.301' });
+  assert.equal(parseRoomCode('a6 301', bs).code, 'A6.301');
+  assert.equal(parseRoomCode('H10-215', bs).code, 'H10.215');
+  assert.equal(parseRoomCode('A10.201', bs).building, 'A10'); // longest code wins
+  assert.equal(parseRoomCode('A1.201', bs).building, 'A1');
+  assert.equal(parseRoomCode('H9A.012', bs).code, 'H9.012'); // OSM alias resolves to the plan code
+  assert.equal(parseRoomCode('Z9.101', bs), null);
+  assert.equal(parseRoomCode('Mensa', bs), null);
+  assert.equal(parseRoomCode('', bs), null);
 });
 
 test('rooms and plain building codes resolve to buildings', () => {
-  assert.equal(locateRoom('A8 0.01', ws).buildingRef.id, 'A8');
+  assert.equal(locateRoom('A8.011', ws).buildingRef.id, 'A8');
   assert.equal(locateBuilding('h10', ws).id, 'H10');
+  assert.equal(locateBuilding('H9A', ws).id, 'H9');
   assert.equal(locateBuilding('Q1', ws), null);
+});
+
+test('every professor office and service points to a mapped building', () => {
+  assert.ok(ws.people.length >= 25);
+  for (const p of ws.people) {
+    assert.ok(locateRoom(p.room, ws), `${p.name}: ${p.room}`);
+    assert.match(p.url, /^https:\/\/(www\.)?hswt\.de\//);
+  }
+  for (const s of ws.pois.filter((p) => p.kind === 'service')) {
+    assert.ok(ws.buildings.some((b) => b.id === s.building), s.id);
+    if (s.room) assert.ok(s.room.startsWith(`${s.building}.`), s.id);
+    assert.match(s.url, /hswt\.de/);
+  }
 });
 
 test('walking estimates and nearest place', () => {
@@ -93,9 +111,9 @@ test('opening hours status and formatting', () => {
 
 test('next class, today list and leave-by time', () => {
   const classes = [
-    { id: '1', title: 'Botanik', room: 'A6 0.01', day: 1, start: '08:15', end: '09:45' },
-    { id: '2', title: 'Statistik', room: 'H10 1.04', day: 1, start: '10:00', end: '11:30' },
-    { id: '3', title: 'Exkursion', room: 'A8 0.01', date: '2026-10-07', start: '09:00', end: '12:00' },
+    { id: '1', title: 'Botanik', room: 'A6.001', day: 1, start: '08:15', end: '09:45' },
+    { id: '2', title: 'Statistik', room: 'D1.439', day: 1, start: '10:00', end: '11:30' },
+    { id: '3', title: 'Exkursion', room: 'A8.001', date: '2026-10-07', start: '09:00', end: '12:00' },
   ];
   const mon = (h, m) => new Date(2026, 9, 5, h, m);
 
@@ -119,7 +137,7 @@ test('ics import handles weekly rules, folding and one-off events', () => {
     'BEGIN:VEVENT',
     'UID:abc',
     'SUMMARY:Pflanzenphysiologie',
-    'LOCATION:H10 1.05',
+    'LOCATION:H10.105',
     'DTSTART;TZID=Europe/Berlin:20261006T081500',
     'DTEND;TZID=Europe/Berlin:20261006T094500',
     'RRULE:FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20270131T000000Z',
@@ -127,7 +145,7 @@ test('ics import handles weekly rules, folding and one-off events', () => {
     'BEGIN:VEVENT',
     'SUMMARY:Prüfung\\, Boden',
     ' kunde',
-    'LOCATION:A6 0.01',
+    'LOCATION:A6.001',
     'DTSTART:20261020T100000',
     'DTEND:20261020T120000',
     'END:VEVENT',
@@ -141,7 +159,7 @@ test('ics import handles weekly rules, folding and one-off events', () => {
   assert.equal(thu.day, 4);
   assert.equal(tue.start, '08:15');
   assert.equal(tue.end, '09:45');
-  assert.equal(tue.room, 'H10 1.05');
+  assert.equal(tue.room, 'H10.105');
   assert.equal(tue.from, '2026-10-06');
   assert.equal(tue.until, '2027-01-31');
   assert.equal(exam.title, 'Prüfung, Bodenkunde');
@@ -150,46 +168,57 @@ test('ics import handles weekly rules, folding and one-off events', () => {
   assert.equal(eventsOn(entries, new Date(2026, 9, 13)).length, 1);
 });
 
-test('search finds rooms, legend services, canteens, stops and own classes', () => {
+test('search finds rooms, offices, professors, canteens, stops and own classes', () => {
   const places = placesOf(ws);
-  const classes = [{ id: '1', title: 'Statistik', room: 'H10 1.04', day: 1, start: '10:00', end: '11:30' }];
-  const find = (q, i18n = de) => search(q, { campus: ws, places, classes, i18n });
+  const classes = [{ id: '1', title: 'Statistik', room: 'D1.439', day: 1, start: '10:00', end: '11:30' }];
+  const contacts = [{ id: 'c1', name: 'Dr. Erika Muster', room: 'H10.101', note: 'Sprechstunde Di 10–11' }];
+  const find = (q, i18n = de) => search(q, { campus: ws, places, classes, contacts, i18n });
 
-  const room = find('a6 1.12')[0];
+  const room = find('a6.301')[0];
   assert.equal(room.type, 'room');
   assert.equal(room.placeId, 'A6');
-  assert.equal(room.subtitle, 'Gebäude A6, 1. Obergeschoss');
-  assert.equal(find('a6 1.12', en)[0].subtitle, 'Building A6, 1st floor');
+  assert.equal(room.subtitle, 'Gebäude A6 · Am Hofgarten 4, 85354 Freising');
 
-  assert.equal(find('Bibliothek')[0].placeId, 'A8');
-  assert.equal(find('library', en)[0].placeId, 'A8');
-  assert.equal(find('studienberatung')[0].placeId, 'A6');
-  assert.equal(find('international office')[0].placeId, 'C4');
-  assert.equal(find('sprachenzentrum')[0].placeId, 'C4');
-  assert.equal(find('forst')[0].placeId, 'F9');
+  assert.equal(find('Student.Service')[0].placeId, 'student-service');
+  assert.equal(find('immatrikulation')[0].placeId, 'student-service');
+  assert.equal(find('Bibliothek')[0].placeId, 'library');
+  assert.equal(find('library', en)[0].placeId, 'library');
+  assert.equal(find('studienberatung')[0].placeId, 'studienberatung');
+  assert.equal(find('career')[0].placeId, 'career-service');
   assert.equal(find('mensa')[0].placeId, 'mensa');
   assert.equal(find('h10')[0].placeId, 'H10');
+  assert.equal(find('kustermannhalle')[0].placeId, 'A9');
   assert.equal(find('bahnhof')[0].title, 'Freising Bahnhof');
   assert.ok(find('weihenstephaner berg').some((r) => r.type === 'transit'));
   assert.ok(find('wohnheim').some((r) => r.type === 'residence'));
 
-  const own = find('stat').find((r) => r.type === 'class');
+  const prof = find('laube')[0];
+  assert.equal(prof.type, 'person');
+  assert.equal(prof.title, 'Prof. Dr. Julia Laube');
+  assert.equal(prof.placeId, 'A5');
+  assert.equal(prof.room.code, 'A5.412');
+  assert.equal(find('Hörster')[0].room.code, 'A5.405');
+  assert.equal(find('hoerster')[0].room.code, 'A5.405');
+  assert.ok(find('waldbau').some((r) => r.title === 'Prof. Dr. Sven Martens'));
+
+  const own = find('muster')[0];
+  assert.equal(own.type, 'contact');
   assert.equal(own.placeId, 'H10');
+
+  const cls = find('stat').find((r) => r.type === 'class');
+  assert.equal(cls.placeId, 'D1');
   assert.deepEqual(find('   '), []);
   assert.equal(normalize('Gewächshaus'), 'gewaechshaus');
 });
 
-test('i18n: language detection, interpolation, floors and countdowns', () => {
+test('i18n: language detection, interpolation, countdowns and opening hours', () => {
   assert.equal(detectLanguage(null, ['de-DE', 'en']), 'de');
   assert.equal(detectLanguage(null, ['en-US']), 'en');
   assert.equal(detectLanguage(null, ['fr-FR']), 'de');
   assert.equal(detectLanguage('en', ['de-DE']), 'en');
+  assert.deepEqual(hasAllKeys(), { missingInEn: [], missingInDe: [] });
 
   assert.equal(de.t('route.summary', { min: 5, dist: '400 m' }), '5 Min. zu Fuß · 400 m');
-  assert.equal(de.floor(0), 'Erdgeschoss');
-  assert.equal(de.floor(2), '2. Obergeschoss');
-  assert.equal(de.floor(-1), 'Untergeschoss');
-  assert.equal(en.floor(3), '3rd floor');
   assert.equal(de.countdown(5 * 60000), 'in 5 Min.');
   assert.equal(en.countdown(90 * 60000), 'in 1 h 30 min');
   assert.equal(de.countdown(0), 'jetzt');
@@ -197,6 +226,11 @@ test('i18n: language detection, interpolation, floors and countdowns', () => {
   assert.equal(en.weekday(5, true), 'Fri');
   assert.equal(de.distance(1234), '1,2 km');
   assert.equal(en.distance(347), '350 m');
+
+  const lib = ws.pois.find((p) => p.id === 'library');
+  assert.deepEqual(en.weeklyHours(lib.hours), ['Mon–Thu 09:00–16:00', 'Fri 09:00–14:00']);
+  const ss = ws.pois.find((p) => p.id === 'student-service');
+  assert.deepEqual(en.weeklyHours(ss.hours), ['Mon 08:00–12:00', 'Wed 10:00–15:00', 'Thu 08:00–12:00', 'Fri 09:00–13:00']);
 });
 
 test('every campus place has a position and name in both languages', () => {

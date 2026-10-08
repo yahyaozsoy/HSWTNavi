@@ -1,5 +1,5 @@
 // Offline support: app shell is cache-first, everything else network-first.
-const CACHE = 'hswt-navigator-v2';
+const CACHE = 'hswt-navigator-v3';
 const SHELL = [
   './',
   'index.html',
@@ -7,6 +7,8 @@ const SHELL = [
   'js/app.js',
   'js/data/campus.js',
   'js/data/weihenstephan.generated.js',
+  'js/data/hswt.js',
+  'js/data/mensa-labels.js',
   'js/lib/i18n.js',
   'js/lib/directions.js',
   'js/lib/mensa.js',

@@ -9,7 +9,8 @@ import {
   parseOsrm,
   getDirections,
 } from '../js/lib/directions.js';
-import { isoWeek, menuUrl, dishesOn } from '../js/lib/mensa.js';
+import { readFileSync } from 'node:fs';
+import { isoWeek, menuUrl, menuWeekStart, dishesOn, daysOf, parseDish, formatPrice, matchesDiet, conflicts, groupByType } from '../js/lib/mensa.js';
 import { createI18n } from '../js/lib/i18n.js';
 
 const A = [48.3955, 11.7302];
@@ -96,7 +97,7 @@ test('directions fall back from Valhalla to OSRM to an offline estimate', async 
   assert.ok(est.meters > 700);
 });
 
-test('Mensa menu: ISO weeks, eat-api URLs and dish parsing', () => {
+test('Mensa: ISO weeks, eat-api URLs and the weekend rollover', () => {
   assert.deepEqual(isoWeek(new Date(2026, 9, 8)), { year: 2026, week: 41 });
   assert.deepEqual(isoWeek(new Date(2027, 0, 1)), { year: 2026, week: 53 });
   assert.deepEqual(isoWeek(new Date(2026, 0, 5)), { year: 2026, week: 2 });
@@ -104,39 +105,57 @@ test('Mensa menu: ISO weeks, eat-api URLs and dish parsing', () => {
     menuUrl('mensa-weihenstephan', new Date(2026, 0, 5)),
     'https://tum-dev.github.io/eat-api/mensa-weihenstephan/2026/02.json',
   );
+  assert.equal(menuWeekStart(new Date(2026, 9, 8)).getDate(), 5); // Thu → Monday of the same week
+  assert.equal(menuWeekStart(new Date(2026, 9, 10)).getDate(), 12); // Sat → next Monday
+  assert.equal(menuWeekStart(new Date(2026, 9, 11)).getDate(), 12); // Sun → next Monday
+});
 
-  const week = {
-    days: [
-      {
-        date: '2026-10-08',
-        dishes: [
-          {
-            name: 'Linsencurry',
-            dish_type: 'Studitopf',
-            labels: ['VEGAN', 'VEGETARIAN'],
-            prices: { students: { base_price: 1.5, price_per_unit: 0, unit: '100g' } },
-          },
-          {
-            name: 'Salatbar',
-            dish_type: 'Beilagen',
-            labels: [],
-            prices: { students: { base_price: 0, price_per_unit: 0.9, unit: '100g' } },
-          },
-        ],
-      },
-    ],
-  };
+// A real week of Mensa Weihenstephan (eat-api, ISO week 41/2026).
+const week = JSON.parse(readFileSync(new URL('./fixtures/mensa-weihenstephan-2026-41.json', import.meta.url)));
+
+test('Mensa: real eat-api week parses into detailed dishes', () => {
+  const days = daysOf(week);
+  assert.ok(days.length >= 3);
   const dishes = dishesOn(week, '2026-10-08');
-  assert.deepEqual(dishes[0], { name: 'Linsencurry', type: 'Studitopf', price: '1.50 €', icons: '🌱🥕' });
-  assert.equal(dishes[1].price, '0.90 €/100g');
-  assert.deepEqual(dishesOn(week, '2026-10-09'), []);
-  assert.deepEqual(dishesOn(null, '2026-10-09'), []);
+  assert.ok(dishes.length >= 5);
+
+  const spaetzle = dishes.find((d) => d.name.startsWith('Allgäuer Käsespätzle'));
+  assert.equal(spaetzle.diet, 'vegetarian');
+  assert.deepEqual(spaetzle.allergenFamilies.sort(), ['eggs', 'gluten', 'milk']);
+  assert.equal(formatPrice(spaetzle.prices.students), '3,35\u00a0€');
+  assert.equal(formatPrice(spaetzle.prices.guests, 'en-GB'), '€5.90');
+
+  const koefte = dishes.find((d) => d.name.startsWith('Köfte'));
+  assert.equal(koefte.diet, 'meat');
+  assert.deepEqual(koefte.meat, ['BEEF']);
+
+  const curry = dishes.find((d) => d.name.startsWith('Massaman'));
+  assert.equal(curry.diet, 'vegan');
+  assert.ok(curry.allergenFamilies.includes('peanuts'));
+  assert.deepEqual(conflicts(curry, ['peanuts', 'fish']), ['peanuts']);
+
+  assert.equal(dishes.filter((d) => matchesDiet(d, 'vegan')).every((d) => d.diet === 'vegan'), true);
+  assert.ok(dishes.filter((d) => matchesDiet(d, 'vegetarian')).length > dishes.filter((d) => matchesDiet(d, 'vegan')).length);
+  assert.ok(!dishes.filter((d) => matchesDiet(d, 'nopork')).some((d) => d.meat.includes('PORK')));
+
+  const groups = groupByType(dishes);
+  assert.equal(groups[0].type, 'StudiTopf');
+  assert.deepEqual(dishesOn(week, '2026-10-11'), []);
+  assert.deepEqual(dishesOn(null, '2026-10-11'), []);
+});
+
+test('Mensa: prices per unit and missing prices', () => {
+  assert.equal(formatPrice({ base_price: 0, price_per_unit: 0.9, unit: '100g' }), '0,90\u00a0€/100g');
+  assert.equal(formatPrice({ base_price: 1.5, price_per_unit: 0.9, unit: '100g' }), '1,50\u00a0€ + 0,90\u00a0€/100g');
+  assert.equal(formatPrice(undefined), '');
+  const d = parseDish({ name: 'X', labels: ['UNKNOWN_LABEL', 'VEGAN', 'VEGETARIAN', 'SULFITES', 'DYESTUFF', 'MSC'] });
+  assert.deepEqual([d.diet, d.allergens, d.additives, d.quality], ['vegan', ['SULFITES'], ['DYESTUFF'], ['MSC']]);
 });
 
 test('German and English dictionaries have the same keys', async () => {
   const de = createI18n('de');
   const en = createI18n('en');
-  const probe = ['tab.map', 'route.go', 'today.leaveBy', 'sheet.menu', 'settings.language', 'about.data'];
+  const probe = ['tab.map', 'route.go', 'today.leaveBy', 'mensa.allergens', 'settings.language', 'about.data'];
   for (const key of probe) {
     assert.notEqual(de.t(key), key);
     assert.notEqual(en.t(key), key);
