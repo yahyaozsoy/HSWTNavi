@@ -1,0 +1,11 @@
+{
+  "name": "HSWT Navigator",
+  "short_name": "HSWT Navi",
+  "description": "Find rooms, your next class and campus services at Hochschule Weihenstephan-Triesdorf.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f4",
+  "theme_color": "#00653a",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

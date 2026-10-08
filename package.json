@@ -1,0 +1,11 @@
+{
+  "name": "hswt-navigator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Campus navigation for Hochschule Weihenstephan-Triesdorf, integrated with your timetable.",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
