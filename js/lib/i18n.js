@@ -20,6 +20,7 @@ const STRINGS = {
 
     'chip.mensa': 'Mensa',
     'chip.library': 'Bibliothek',
+    'chip.tumLibrary': 'TUM-Bibliothek (bis 24 Uhr)',
     'chip.studentService': 'Student.Service',
     'chip.cafe': 'Café',
     'chip.station': 'Bahnhof',
@@ -30,6 +31,7 @@ const STRINGS = {
     'kind.transit': 'Haltestelle',
     'kind.residence': 'Wohnheim',
     'kind.service': 'Einrichtung',
+    'kind.study': 'Lernen & Bibliothek',
     'kind.community': 'Gemeinde',
     'kind.parking': 'Parkplatz',
     'kind.person': 'Büro',
@@ -70,6 +72,8 @@ const STRINGS = {
     'sheet.phone': 'Telefon',
     'sheet.email': 'E-Mail',
     'sheet.website': 'Mehr auf hswt.de',
+    'sheet.websiteOther': 'Website',
+    'sheet.note': 'Hinweis',
     'sheet.profile': 'Profil & Sprechzeiten auf hswt.de',
     'sheet.share': 'Teilen',
     'sheet.copied': 'Link kopiert',
@@ -172,6 +176,11 @@ const STRINGS = {
     'settings.buffer': 'Minuten früher ankommen',
     'settings.language': 'Sprache',
     'settings.reset': 'Einführung erneut zeigen',
+    'settings.theme': 'Darstellung',
+    'settings.theme.auto': 'Automatisch (wie System)',
+    'settings.theme.light': 'Hell',
+    'settings.theme.dark': 'Dunkel',
+    'settings.themeToggle': 'Hell/Dunkel umschalten',
     'about.data':
       'Gebäude: OpenStreetMap-Umrisse, zugeordnet über den offiziellen HSWT-Lageplan. Büros & Anlaufstellen: hswt.de (Stand {date}). Routing: FOSSGIS Valhalla/OSRM. Haltestellen: DELFI/MVV. Mensa: Studierendenwerk via TUM-Dev eat-api.',
 
@@ -212,6 +221,7 @@ const STRINGS = {
 
     'chip.mensa': 'Mensa',
     'chip.library': 'Library',
+    'chip.tumLibrary': 'TUM library (till midnight)',
     'chip.studentService': 'Student.Service',
     'chip.cafe': 'Café',
     'chip.station': 'Station',
@@ -222,6 +232,7 @@ const STRINGS = {
     'kind.transit': 'Bus stop',
     'kind.residence': 'Residence hall',
     'kind.service': 'Office',
+    'kind.study': 'Study & library',
     'kind.community': 'Community',
     'kind.parking': 'Car park',
     'kind.person': 'Office',
@@ -262,6 +273,8 @@ const STRINGS = {
     'sheet.phone': 'Phone',
     'sheet.email': 'Email',
     'sheet.website': 'More on hswt.de',
+    'sheet.websiteOther': 'Website',
+    'sheet.note': 'Note',
     'sheet.profile': 'Profile & office hours on hswt.de',
     'sheet.share': 'Share',
     'sheet.copied': 'Link copied',
@@ -364,6 +377,11 @@ const STRINGS = {
     'settings.buffer': 'Minutes to arrive early',
     'settings.language': 'Language',
     'settings.reset': 'Show introduction again',
+    'settings.theme': 'Appearance',
+    'settings.theme.auto': 'Automatic (system)',
+    'settings.theme.light': 'Light',
+    'settings.theme.dark': 'Dark',
+    'settings.themeToggle': 'Switch light/dark',
     'about.data':
       'Buildings: OpenStreetMap outlines, matched via the official HSWT site plan. Offices: hswt.de (as of {date}). Routing: FOSSGIS Valhalla/OSRM. Stops: DELFI/MVV. Mensa: Studierendenwerk via TUM-Dev eat-api.',
 

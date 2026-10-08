@@ -12,8 +12,9 @@ your timetable, today's Mensa menu and when to leave for your next class. The in
 |---|---|
 | **Accurate campus map** | All HSWT buildings (A1–A11, C4–C6, D1, F9/F10, H1–H21 incl. H3, H12) drawn with their real OpenStreetMap outlines, matched to the codes on the official HSWT site plan. Also residences, HSG, car parks and bus stops. |
 | **Rooms & offices** | Type a room as HSWT writes it (`A6.301`, `D1.436`, `h10 215`), a professor's name (*Laube*, *Martens*) or an office (*Student.Service*, *Immatrikulation*, *Career Service*). Each result has a walking route, address and link to the hswt.de page. |
-| **Professors' offices** | 26 professors' offices from their hswt.de profile pages, grouped by faculty, each linking to the profile for office hours. You can add anyone else yourself (*Campus → My contacts*), and they then show up in search. |
+| **Professors' offices** | 50 professors' offices from their hswt.de profile pages, grouped by faculty, each linking to the profile for office hours. You can add anyone else yourself (*Campus → My contacts*), and they then show up in search. |
 | **Where to go for help** | Student.Service, student advisory service, library, International Office, Career Service, Language Centre and the dean's offices, with room, live opening status, weekly hours, phone and email. |
+| **Study late** | The TUM branch library next to the Mensa (Mon–Fri until midnight, weekends 10–20) with live open/closed status. |
 | **Detailed Mensa menu** | Whole week with day tabs, dishes grouped by counter, prices for students, staff or guests, diet badges, and allergens and additives per dish. Filters for vegetarian, vegan and no pork, plus *my allergens*, which flags or hides dishes containing them (all 14 EU allergens). |
 | **Real walking routes** | Turn-by-turn directions in German or English from FOSSGIS Valhalla, starting at your GPS position, Freising station or any building. Falls back to OSRM, then to an offline estimate. Step-free mode uses Valhalla's wheelchair profile. |
 | **Next class** | *Heute/Today* shows your next class, its room and building, the walking time and **when to leave**, plus a lunch tip from today's Mensa menu. |
@@ -21,6 +22,7 @@ your timetable, today's Mensa menu and when to leave for your next class. The in
 | **Timetable import** | `.ics` export (weekly `RRULE`s, one-off exams) or manual entry. Stays on the device. |
 | **Deep links** | `?q=A6.301` or `?q=Laube` opens a room or person directly, e.g. from a QR code on a door sign. |
 | **German & English** | Follows the browser language. Switch in the header. |
+| **Dark mode** | Follows the system or can be set by hand (🌙/☀️ in the header, or *Campus → Settings*). The map tiles are darkened too. |
 | **Installable & offline** | PWA: the app shell and the map tiles you've already viewed keep working on patchy campus Wi-Fi. |
 
 ## Run it
@@ -41,6 +43,7 @@ npm test         # unit tests with Node's built-in test runner (Node 18+)
 | Offices, rooms, hours, addresses, professors | Public pages on www.hswt.de (collected 8 Oct 2026, source link per entry in `js/data/hswt.js`) |
 | Bus stops | DELFI/MVV public-transport data (via NavigaTUM) |
 | Canteens, hours, menus, allergens | Studierendenwerk München Oberbayern via [TUM-Dev eat-api](https://github.com/TUM-Dev/eat-api) |
+| TUM branch library hours | [ub.tum.de](https://www.ub.tum.de/en/branch-library-weihenstephan) (via NavigaTUM, Aug 2026) |
 | Base map | © OpenStreetMap contributors (`tile.openstreetmap.org`) |
 | Walking routes | [FOSSGIS Valhalla](https://valhalla1.openstreetmap.de) and [FOSSGIS OSRM](https://routing.openstreetmap.de), on OpenStreetMap data |
 
@@ -89,7 +92,7 @@ tests/                             Unit tests
 ## Known limits
 
 - There are no indoor floor plans, so routes end at the building, not at the room. HSWT room numbers don't reliably encode the floor, so the app doesn't guess one.
-- The professor list covers the 26 offices published on hswt.de profile pages that could be collected. Everyone else can be added under *My contacts* (with a link to the HSWT person directory).
+- The professor list covers the 50 Weihenstephan offices published on hswt.de profile pages that could be collected. Everyone else can be added under *My contacts* (with a link to the HSWT person directory).
 - Office hours and Mensa data change. Each office links to its source page, and the menu shows the Studierendenwerk's own data, which comes without guarantee.
 - Step-free routing is only as good as OpenStreetMap's tagging of steps and kerbs on campus.
 - Only the Weihenstephan campus is mapped. Triesdorf needs its own site plan.

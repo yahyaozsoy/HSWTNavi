@@ -1,5 +1,5 @@
 // Offline support: app shell is cache-first, everything else network-first.
-const CACHE = 'hswt-navigator-v3';
+const CACHE = 'hswt-navigator-v4';
 const SHELL = [
   './',
   'index.html',

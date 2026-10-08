@@ -88,6 +88,29 @@ const canteens = [
   },
 ];
 
+// TUM's branch library next to the Mensa: open late and on weekends, a popular study spot.
+// Hours from ub.tum.de (via NavigaTUM, Aug 2026).
+const study = geo.extras?.tumLibrary
+  ? [
+      {
+        id: 'tum-library',
+        kind: 'study',
+        name: { de: 'TUM Teilbibliothek Weihenstephan', en: 'TUM Branch Library Weihenstephan' },
+        description: { de: 'Lernplätze bis Mitternacht, auch am Wochenende', en: 'Study spaces until midnight, weekends too' },
+        address: 'Maximus-von-Imhof-Forum 1, 85354 Freising',
+        aliases: ['Bibliothek', 'Library', 'TUM', 'UB', 'Teilbibliothek', 'Lernplatz', 'Lernen', 'Study', 'Wochenende'],
+        latlng: geo.extras.tumLibrary.latlng,
+        footprints: geo.extras.tumLibrary.footprints,
+        hours: { ...weekdays('08:00', '24:00'), 6: [['10:00', '20:00']], 0: [['10:00', '20:00']] },
+        note: {
+          de: 'Ausleihe mit Bibliotheksausweis; HSWT-Studierende melden sich über die gemeinsame Anmeldekarte HSWT/TUM an.',
+          en: 'Borrowing needs a library card; HSWT students register with the joint HSWT/TUM registration card.',
+        },
+        url: 'https://www.ub.tum.de/en/branch-library-weihenstephan',
+      },
+    ]
+  : [];
+
 const residences = Object.entries(geo.residences)
   .map(([code, r]) => ({
     id: code.replace(' ', ''),
@@ -138,7 +161,7 @@ export const CAMPUSES = [
     station: stops.find((s) => s.name === 'Freising Bahnhof')?.latlng ?? [48.395252, 11.744187],
     georeference: geo.georeference,
     buildings,
-    pois: [...canteens, ...services, ...community, ...residences, ...stops],
+    pois: [...canteens, ...services, ...study, ...community, ...residences, ...stops],
     people,
     unlabeledFootprints: geo.unlabeledFootprints,
     parking: geo.parking,
