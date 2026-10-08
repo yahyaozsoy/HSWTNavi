@@ -16,11 +16,16 @@ Usage:
     git clone --depth 1 --filter=blob:limit=5m --sparse https://github.com/TUM-Dev/NavigaTUM
     (cd NavigaTUM && git sparse-checkout set data/external/results)
     python3 tools/build_campus_data.py hswt-lageplan-weihenstephan.pdf NavigaTUM/data/external/results
+
+    # Optional, recommended: snap to real OpenStreetMap footprints (see tools/osm_refine.py)
+    python3 tools/fetch_overture_buildings.py overture-buildings.parquet
+    python3 tools/build_campus_data.py hswt-lageplan-weihenstephan.pdf NavigaTUM/data/external/results overture-buildings.parquet
 """
 
 import csv
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -194,7 +199,7 @@ def georeference(shapes, navigatum_dir):
         "metresPerPt": round(abs(z), 4),
         "rotationDeg": round(math.degrees(np.angle(z)), 3),
     }
-    return T, stats
+    return T, stats, z, [(p[1], p[2]) for p in good]
 
 
 def nearest_label(poly, labels):
@@ -215,15 +220,26 @@ def ring_ll(poly, T):
     return [list(to_ll(T(p))) for p in list(simplified.exterior.coords)[:-1]]
 
 
-def main(pdf_path, navigatum_dir, out_path):
+def ring_ll_m(poly):
+    """Footprint already in metres → [[lat, lng], …] (largest part, lightly simplified)."""
+    if poly.geom_type == "MultiPolygon":
+        poly = max(poly.geoms, key=lambda g: g.area)
+    return [list(to_ll(p)) for p in list(poly.simplify(0.3).exterior.coords)[:-1]]
+
+
+def lonlat_to_m(x, y, z=None):
+    return (np.asarray(x) - LON0) * KX, (np.asarray(y) - LAT0) * KY
+
+
+def main(pdf_path, navigatum_dir, out_path, overture_buildings=None):
     page = pymupdf.open(pdf_path)[0]
     shapes = read_shapes(page)
-    T, stats = georeference(shapes, navigatum_dir)
+    T, stats, z, tum_pairs = georeference(shapes, navigatum_dir)
     print("georeference:", stats, file=sys.stderr)
 
     labels = read_labels(page, LABEL_GREEN)
-    buildings = {}
-    unlabeled = []
+    plan_polys = {}
+    unlabeled_polys = []
     for s in shapes:
         if s["color"] != HSWT_GREEN or s["poly"].area < 5:
             continue
@@ -231,42 +247,94 @@ def main(pdf_path, navigatum_dir, out_path):
         if not found:
             code = nearest_label(s["poly"], labels)[0]
         if code is None:
-            unlabeled.append(ring_ll(s["poly"], T))
-            continue
-        buildings.setdefault(code, []).append(s["poly"])
-
-    out_buildings = {}
-    for code, polys in buildings.items():
-        union = unary_union(polys)
-        out_buildings[code] = {
-            "latlng": list(to_ll(T(MARKER_OVERRIDES.get(code, union.centroid.coords[0])))),
-            "footprints": [ring_ll(p, T) for p in polys],
-        }
-    for code in MARKER_OVERRIDES:  # buildings without their own polygon (A2, A6, A7)
-        if code not in out_buildings:
-            out_buildings[code] = {"latlng": list(to_ll(T(MARKER_OVERRIDES[code]))), "footprints": []}
+            unlabeled_polys.append(s["poly"])
+        else:
+            plan_polys.setdefault(code, []).append(s["poly"])
 
     residence_labels = read_labels(page, LABEL_RESIDENCE)
-    residences = {}
+    residence_polys = {}
     for s in shapes:
         if s["color"] == RESIDENCE and s["poly"].area > 5:
-            code = nearest_label(s["poly"], residence_labels)[0]
-            residences.setdefault(code, []).append(s["poly"])
-    out_residences = {
-        code: {"latlng": list(to_ll(T(unary_union(p).centroid.coords[0]))), "footprints": [ring_ll(x, T) for x in p]}
-        for code, p in residences.items()
-    }
+            residence_polys.setdefault(nearest_label(s["poly"], residence_labels)[0], []).append(s["poly"])
     hsg = next(s for s in shapes if s["color"] == HSG)
-    out_hsg = {"latlng": list(to_ll(T(hsg["c"]))), "footprints": [ring_ll(hsg["poly"], T)]}
+    parking_pts = [s["c"] for s in shapes if s["color"] == PARKING and 15 < s["poly"].area < 40 and s["c"][0] < LEGEND_X]
 
-    def icon_positions(color, min_area, max_area):
-        return [
-            list(to_ll(T(s["c"])))
-            for s in shapes
-            if s["color"] == color and min_area < s["poly"].area < max_area and s["c"][0] < LEGEND_X
-        ]
+    # Without OpenStreetMap data, the plan's similarity transform is all we have.
+    place = T
+    osm, osm_groups, used, aliases = [], {}, set(), {}
+    if overture_buildings:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from osm_refine import (RubberSheet, best_overlap, code_control_points, load_osm_buildings,
+                                osm_code_groups, warp_polygon)
 
-    parking = icon_positions(PARKING, 15, 40)
+        osm = load_osm_buildings(overture_buildings, lonlat_to_m)
+        osm_groups = osm_code_groups(osm)
+        shared = set(MARKER_OVERRIDES)  # drawn as one polygon on the plan, not comparable
+        code_pts = code_control_points(plan_polys, osm_groups, abs(z), shared)
+        sheet = RubberSheet(T, [p for p, _ in tum_pairs] + [c[1] for c in code_pts], [q for _, q in tum_pairs] + [c[2] for c in code_pts])
+        stats["rubberSheet"] = sheet.leave_one_out()
+        print("rubber sheet:", stats["rubberSheet"], file=sys.stderr)
+        place = sheet
+        unclaimed = [b for b in osm if not b["code"]]
+        # OSM sometimes names a plan building with a suffix (plan "H9" = OSM "H9A"): adopt it.
+        for code in set(plan_polys) - set(osm_groups):
+            for other in [c for c in list(osm_groups) if c.startswith(code) and c not in plan_polys]:
+                warped = unary_union([warp_polygon(p, place) for p in plan_polys[code]])
+                if best_overlap(warped, osm_groups[other], min_score=0.6)[0]:
+                    osm_groups[code] = osm_groups.pop(other)
+                    aliases[code] = [other]
+
+    def snapped(poly_pt):
+        """Plan polygon → (footprint in metres, OSM building or None)."""
+        if not osm:
+            return Polygon([tuple(T(p)) for p in poly_pt.exterior.coords]) if poly_pt.geom_type == "Polygon" else None, None
+        warped = warp_polygon(poly_pt, place)
+        match, _ = best_overlap(warped, [b for b in unclaimed if b["id"] not in used])
+        if match:
+            used.add(match["id"])
+            return match["geom"], match
+        return warped, None
+
+    def entry(footprints_m, floors=None, source="plan", marker=None):
+        largest = max(footprints_m, key=lambda g: g.area)
+        point = marker if marker is not None else np.array(largest.representative_point().coords[0])
+        e = {"latlng": list(to_ll(point)), "footprints": [ring_ll_m(g) for g in footprints_m], "source": source}
+        if floors:
+            e["floors"] = int(floors)
+        return e
+
+    out_buildings = {}
+    for code in sorted(set(plan_polys) | set(MARKER_OVERRIDES) | set(osm_groups)):
+        if code in osm_groups:
+            group = osm_groups[code]
+            floors = max((b["floors"] or 0) for b in group) or None
+            out_buildings[code] = entry([b["geom"] for b in group], floors, "osm")
+            if code in aliases:
+                out_buildings[code]["aliases"] = aliases[code]
+            continue
+        if code in plan_polys:
+            results = [snapped(p) for p in plan_polys[code]]
+            matched = [m for _, m in results if m]
+            floors = max((m["floors"] or 0) for m in matched) if matched else None
+            out_buildings[code] = entry([g for g, _ in results if g is not None], floors, "osm-matched" if matched else "plan")
+        else:  # marker-only building without OSM data
+            out_buildings[code] = {"latlng": list(to_ll(place(MARKER_OVERRIDES[code]))), "footprints": [], "source": "plan"}
+    unlabeled = [ring_ll_m(g) for g, m in map(snapped, unlabeled_polys) if g is not None]
+
+    named = {b["name"]: b for b in osm}
+    out_residences = {}
+    for code, polys in residence_polys.items():
+        osm_name = {"WH I": "Wohnheim I", "WH III": "Wohnheim III"}.get(code)
+        if osm_name in named:
+            out_residences[code] = entry([named[osm_name]["geom"]], named[osm_name]["floors"], "osm")
+        else:
+            results = [snapped(p) for p in polys]
+            out_residences[code] = entry([g for g, _ in results if g is not None], None, "osm-matched" if any(m for _, m in results) else "plan")
+    if "Hochschulgemeinde Freising" in named:
+        out_hsg = entry([named["Hochschulgemeinde Freising"]["geom"]], None, "osm")
+    else:
+        out_hsg = entry([snapped(hsg["poly"])[0]])
+    parking = [list(to_ll(place(p))) for p in parking_pts]
 
     # Real stop names and coordinates (DELFI GTFS via NavigaTUM), clipped to the plan area.
     corners = [to_ll(T(p)) for p in [(0, 0), (LEGEND_X, 0), (0, 600), (852, 600)]]
@@ -281,10 +349,13 @@ def main(pdf_path, navigatum_dir, out_path):
         for _, r in df.iterrows()
     ]
 
+    source = "HSWT Lageplan Weihenstephan (PDF), georeferenced against NavigaTUM building coordinates"
+    if osm:
+        source += "; footprints from OpenStreetMap via Overture Maps"
     data = {
-        "source": "HSWT Lageplan Weihenstephan (PDF), georeferenced against NavigaTUM building coordinates",
+        "source": source,
         "georeference": stats,
-        "buildings": dict(sorted(out_buildings.items())),
+        "buildings": dict(sorted(out_buildings.items(), key=lambda kv: (kv[0][0], int(re.sub(r"\D", "", kv[0]) or 0), kv[0]))),
         "unlabeledFootprints": unlabeled,
         "residences": dict(sorted(out_residences.items())),
         "hsg": out_hsg,
@@ -298,11 +369,14 @@ def main(pdf_path, navigatum_dir, out_path):
         f"export default {body};\n",
         encoding="utf-8",
     )
-    print(f"wrote {out_path}: {len(out_buildings)} buildings, {len(stops)} stops, {len(parking)} car parks", file=sys.stderr)
+    by_source = {}
+    for code, b in out_buildings.items():
+        by_source.setdefault(b["source"], []).append(code)
+    print(f"wrote {out_path}: {len(out_buildings)} buildings {by_source}, {len(stops)} stops, {len(parking)} car parks", file=sys.stderr)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         sys.exit(__doc__)
-    out = sys.argv[3] if len(sys.argv) > 3 else Path(__file__).resolve().parent.parent / "js/data/weihenstephan.generated.js"
-    main(sys.argv[1], sys.argv[2], out)
+    overture = sys.argv[3] if len(sys.argv) > 3 else None
+    main(sys.argv[1], sys.argv[2], Path(__file__).resolve().parent.parent / "js/data/weihenstephan.generated.js", overture)
