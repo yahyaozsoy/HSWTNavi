@@ -3,6 +3,7 @@
 // Rooms use HSWT's own format "<building>.<room>", e.g. "A6.301".
 
 export const RETRIEVED = '2026-10-08';
+
 export const SWITCHBOARD = { phone: '+49 8161 71-0', address: 'Am Hofgarten 4, 85354 Freising' };
 export const PERSON_DIRECTORY_URL = 'https://www.hswt.de/en/about/contact/register-of-persons';
 
@@ -173,11 +174,22 @@ export const PEOPLE = [
   { name: 'Prof. Dr. Jörg Kleiber', faculty: 'BI', room: 'A3.620', field: { de: 'Biochemie & Gentechnologie · Studiendekan', en: 'Biochemistry & genetic engineering · Dean of studies' }, url: 'https://www.hswt.de/joerg-kleiber' },
   { name: 'Prof. Dr. Ulrich Hege', faculty: 'BI', room: 'C5.208', field: { de: 'Studienfachberater Bioprozessinformatik', en: 'Subject advisor Bioprocess Informatics' }, url: 'https://www.hswt.de/ulrich-hege' },
   { name: 'Prof. Dr. Martin Stetter', faculty: 'BI', room: 'C5.210', field: { de: 'Bioinformatik & Datenbanken', en: 'Bioinformatics & databases' }, url: 'https://www.hswt.de/martin-stetter' },
+  { name: 'Prof. Dr. Manuel Dehnert', faculty: 'BI', room: 'C5.204', field: { de: 'Mathematik, Statistik & Informatik', en: 'Mathematics, statistics & computer science' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/manuel-dehnert' },
+  { name: 'Prof. Dr. Sabine Grüner-Lempart', faculty: 'BI', room: 'A3.617', field: null, note: { de: 'Wegen Bauarbeiten derzeit Ausweichbüro A2.203.', en: 'Temporarily in A2.203 because of construction work.' }, url: 'https://www.hswt.de/sabine-gruener-lempart' },
+  { name: 'Prof. Dr. Volker Müller-Schollenberger', faculty: 'BI', room: 'H1.319', field: { de: 'Sensorik & Mikrobiologie', en: 'Sensory science & microbiology' }, url: 'https://www.hswt.de/person/volker-mueller-schollenberger' },
   // Gartenbau und Lebensmitteltechnologie
   { name: 'Prof. Dr. Heike Susanne Mempel', faculty: 'GL', room: 'H10.322', field: { de: 'Technik im Gartenbau & Qualitätsmanagement', en: 'Horticultural engineering & quality management' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/heike-susanne-mempel' },
   { name: 'Prof. Dr. Sebastian Peisl', faculty: 'GL', room: 'H10.319', field: { de: 'Vizepräsident Forschung & Entwicklung', en: 'Vice President Research & Development' }, url: 'https://www.hswt.de/en/sebastian-peisl' },
   { name: 'Prof. Dr. Bernd Hertle', faculty: 'GL', room: 'H10.414', field: { de: 'Freilandzierpflanzen', en: 'Outdoor ornamental plants' }, url: 'https://www.hswt.de/en/bernd-hertle' },
-  { name: 'Prof. Dr. Bernhard Hauser', faculty: 'GL', room: 'H11.306', field: { de: 'Gartenbau', en: 'Horticulture' }, url: 'https://www.hswt.de/bernhard-hauser' },
+  { name: 'Prof. Dr. Bernhard Hauser', faculty: 'GL', room: 'H11.306', field: { de: 'Zierpflanzenbau & Pflanzenzüchtung', en: 'Ornamental horticulture & plant breeding' }, url: 'https://www.hswt.de/bernhard-hauser' },
+  { name: 'Prof. Dr. Thomas Hannus', faculty: 'GL', room: 'H10.315', field: { de: 'Dekan Gartenbau und Lebensmitteltechnologie', en: 'Dean, Horticulture and Food Technology' }, note: { de: 'Sprechstunde in der Vorlesungszeit: Di 17:00–17:45 und nach Vereinbarung.', en: 'Office hour in the lecture period: Tue 17:00–17:45 and by appointment.' }, url: 'https://www.hswt.de/en/thomas-hannus' },
+  { name: 'Prof. Dr. Johannes Nebelmeir', faculty: 'GL', room: 'H11.306', field: { de: 'Pflanzenzüchtung & Zierpflanzenbau', en: 'Plant breeding & ornamental horticulture' }, url: 'https://www.hswt.de/johannes-nebelmeir' },
+  { name: 'Prof. Dr. Dominikus Kittemann', faculty: 'GL', room: 'H7.206', field: { de: 'Obstbau', en: 'Fruit growing' }, url: 'https://www.hswt.de/en/dominikus-kittemann' },
+  { name: 'Prof. Dr.-Ing. Vladimir Ilberg', faculty: 'GL', room: 'H1.317', field: { de: 'Lebensmitteltechnologie & Verfahrenstechnik · Studiengangleitung', en: 'Food technology & process engineering · Programme director' }, url: 'https://www.hswt.de/en/vladimir-ilberg' },
+  { name: 'Prof. Dr. Özlem Özmutlu Karslioglu', faculty: 'GL', room: 'H1.318', field: { de: 'Lebensmitteltechnologie, alternative Proteine', en: 'Food technology, alternative proteins' }, url: 'https://www.hswt.de/en/oezlem-oezmutlu-karslioglu' },
+  { name: 'Prof. Dr. Carola Kuss', faculty: 'GL', room: 'C4.251', field: { de: 'Lebensmitteltechnologie · Stundenplanung', en: 'Food technology · Timetabling' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/carola-kuss' },
+  { name: 'Prof. Dr. Marion Stoffels-Schmid', faculty: 'GL', room: 'C4.250', field: { de: 'Mikrobiologie, Hygiene & Produktsicherheit', en: 'Microbiology, hygiene & product safety' }, url: 'https://www.hswt.de/person/marion-stoffels-schmid.html' },
+  { name: 'Prof. Dr. Anton Buchmeier', faculty: 'GL', room: 'C4.252', field: { de: 'Informatik, Mathematik & Statistik', en: 'Computer science, mathematics & statistics' }, url: 'https://www.hswt.de/en/anton-buchmeier' },
   // Landschaftsarchitektur
   { name: 'Prof. Dr. Julia Laube', faculty: 'LA', room: 'A5.412', field: { de: 'Dekanin · Ingenieurökologie & Landschaftsentwicklung', en: 'Dean · Engineering ecology & landscape development' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/julia-laube' },
   { name: 'Prof. Dr. Sabrina Wilk', faculty: 'LA', room: 'A5.426', field: { de: 'Studiendekanin Landschaftsarchitektur', en: 'Dean of studies Landscape Architecture' }, url: 'https://hswt.de/person/sabrina-wilk.html' },
@@ -185,6 +197,11 @@ export const PEOPLE = [
   { name: 'Prof. Sonja Hörster', faculty: 'LA', room: 'A5.405', field: { de: 'Kommunikation & Partizipation', en: 'Communication & participation' }, url: 'https://www.hswt.de/en/sonja-hoerster' },
   { name: 'Prof. Susanne Burger', faculty: 'LA', room: 'A5.406', field: { de: 'Entwerfen', en: 'Design' }, url: 'https://www.hswt.de/en/susanne-burger' },
   { name: 'Prof. Birgit Schmidt', faculty: 'LA', room: 'A5.421', field: { de: 'Projektplanung', en: 'Project planning' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/birgit-schmidt' },
+  { name: 'Prof. Dr.-Ing. Sebastian Knoll', faculty: 'LA', room: 'A5.407', field: { de: 'Nachhaltiger Landschaftsbau', en: 'Sustainable landscape construction' }, url: 'https://www.hswt.de/en/sebastian-knoll' },
+  { name: 'Prof. Dr. Kristian Förster', faculty: 'LA', room: 'A5.423', field: { de: 'Hydrologie', en: 'Hydrology' }, url: 'https://www.hswt.de/kristian-foerster' },
+  { name: 'Prof. Christoph Jensen', faculty: 'LA', room: 'A5.425', field: { de: 'Architektur & Städtebau', en: 'Architecture & urban design' }, url: 'https://www.hswt.de/person/christoph-jensen' },
+  { name: 'Prof. Dr. Holger Beiersdorf', faculty: 'LA', room: 'A5.404', field: null, url: 'https://www.hswt.de/holger-beiersdorf' },
+  { name: 'Prof. Karl-Heinz Einberger', faculty: 'LA', room: 'A5.406', field: null, url: 'https://www.hswt.de/karl-heinz-einberger' },
   // Nachhaltige Agrar- und Energiesysteme
   { name: 'Prof. Dr. Thomas Ebertseder', faculty: 'NAE', room: 'D1.228', field: { de: 'Pflanzenbau · Studiendekan Master Agrarmanagement', en: 'Crop production · Dean of studies MSc Agricultural Management' }, url: 'https://hswt.de/person/thomas-ebertseder.html' },
   { name: 'Prof. Dr. Bernhard Schauberger', faculty: 'NAE', room: 'D1.216', field: { de: 'Agrarsysteme & Klimawandel', en: 'Agricultural systems & climate change' }, url: 'https://www.hswt.de/bernhard-schauberger' },
@@ -193,9 +210,17 @@ export const PEOPLE = [
   { name: 'Prof. Dr. Sarah Kühl', faculty: 'NAE', room: 'D1.436', field: { de: 'Marketing & Marktforschung', en: 'Marketing & market research' }, url: 'https://www.hswt.de/person/sarah-kuehl' },
   { name: 'Prof. Dr. Alois Scheuerlein', faculty: 'NAE', room: 'D1.438', field: { de: 'Landwirtschaftliche Betriebslehre & Management', en: 'Farm management' }, url: 'https://www.hswt.de/alois-scheuerlein' },
   { name: 'Prof. Dr. Jens Hartung', faculty: 'NAE', room: 'D1.439', field: { de: 'Mathematik, Statistik & Datenverarbeitung', en: 'Mathematics, statistics & data processing' }, url: 'https://www.hswt.de/person/jens-hartung' },
+  { name: 'Prof. Dr. Martin Spreidler', faculty: 'NAE', room: 'D1.332', field: { de: 'Dekan · Rechnungswesen & Steuern', en: 'Dean · Accounting & taxation' }, url: 'https://www.hswt.de/en/martin-spreidler' },
+  { name: 'Prof. Dr. Oliver Falk', faculty: 'NAE', room: 'D1.315', field: { de: 'Technik erneuerbarer Energien · Studiendekan', en: 'Renewable energy technology · Dean of studies' }, url: 'https://hswt.de/person/oliver-falk' },
+  { name: 'Prof. Dr. Martina Otten', faculty: 'NAE', room: 'D1.317', field: { de: 'Chemie · Prodekanin', en: 'Chemistry · Vice dean' }, url: 'https://www.hswt.de/martina-otten' },
+  { name: 'Prof. Dr. Michael Wagner', faculty: 'NAE', room: 'D1.435', field: { de: 'Betriebswirtschaft & Unternehmensführung', en: 'Business administration & management' }, url: 'https://www.hswt.de/en/michael-wagner' },
   // Wald und Forstwirtschaft
   { name: 'Prof. Dr. Sven Martens', faculty: 'WF', room: 'F9.408', field: { de: 'Waldbau & Waldwachstum', en: 'Silviculture & forest growth' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/sven-martens' },
-  { name: 'Prof. Dr. Martin Walter', faculty: 'WF', room: 'F9.410', field: null, url: 'https://www.hswt.de/en/martin-walter' },
+  { name: 'Prof. Dr. Ewald Endres', faculty: 'WF', room: 'F9.409', field: { de: 'Forstrecht & Forstpolitik', en: 'Forest law & policy' }, url: 'https://www.hswt.de/en/ewald-endres' },
+  { name: 'Prof. Dr. Martin Walter', faculty: 'WF', room: 'F9.410', field: { de: 'Holzkunde & Holzverwendung, Marketing, Zertifizierung', en: 'Wood science & utilisation, marketing, certification' }, url: 'https://www.hswt.de/en/martin-walter' },
+  { name: 'Prof. Dr. Jörg Ewald', faculty: 'WF', room: 'F9.411', field: { de: 'Bergökosysteme · Prodekan', en: 'Mountain ecosystems · Vice dean' }, url: 'https://www.hswt.de/en/joerg-ewald' },
+  { name: 'Prof. Dr. Volker Zahner', faculty: 'WF', room: 'F9.412', field: { de: 'Zoologie, Wildtierökologie & Entomologie', en: 'Zoology, wildlife ecology & entomology' }, url: 'https://www.hswt.de/volker-zahner' },
+  { name: 'Prof. Dr. habil. Carsten Lorz', faculty: 'WF', room: 'F9.414', field: { de: 'Forstliche Bodenkunde · Vizepräsident Internationales', en: 'Forest soil science · Vice President International' }, url: 'https://www.hswt.de/en/carsten-lorz' },
   { name: 'Prof. Dr. Barbara Darr', faculty: 'WF', room: 'F9.411', field: { de: 'Urbanes Waldmanagement', en: 'Urban forest management' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/barbara-darr' },
   { name: 'Prof. Andrea Stübner', faculty: 'WF', room: 'F9.420', field: { de: 'Forstökonomie & Betriebsplanung', en: 'Forest economics & operational planning' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/andrea-stuebner' },
   { name: 'Prof. Dr. Christian Zang', faculty: 'WF', room: 'F9.421', field: { de: 'Wald & Klimawandel', en: 'Forests & climate change' }, url: 'https://www.hswt.de/en/hochschule/kontakt/person-directory/profile/christian-zang' },

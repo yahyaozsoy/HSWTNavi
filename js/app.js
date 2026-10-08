@@ -52,6 +52,7 @@ const state = {
   saved: store.get('saved', []), // [{ key, title, subtitle, placeId, roomCode, personId }]
   recent: store.get('recent', []),
   avoidStairs: store.get('avoidStairs', false),
+  theme: store.get('theme', 'auto'), // 'auto' | 'light' | 'dark'
   bufferMin: store.get('bufferMin', 3),
   lang: detectLanguage(store.get('lang', null), navigator.languages ?? [navigator.language]),
   mensa: { role: store.get('mensaRole', 'students'), diet: store.get('mensaDiet', 'all'), avoid: store.get('allergens', []), hide: store.get('hideConflicts', false), week: 0, day: null },
@@ -118,6 +119,31 @@ document.querySelectorAll('[data-lang]').forEach((b) =>
   }),
 );
 
+// ---------- theme ----------
+
+const darkQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+const isDark = () => state.theme === 'dark' || (state.theme === 'auto' && !!darkQuery?.matches);
+
+function applyTheme() {
+  const root = document.documentElement;
+  if (state.theme === 'auto') delete root.dataset.theme;
+  else root.dataset.theme = state.theme;
+  const dark = isDark();
+  $('#theme-btn').textContent = dark ? '☀️' : '🌙';
+  $('#theme-select').value = state.theme;
+  document.querySelector('meta[name="theme-color"]').content = dark ? '#0b1f15' : '#004d2c';
+}
+
+function setTheme(theme) {
+  state.theme = theme;
+  store.set('theme', theme);
+  applyTheme();
+}
+
+$('#theme-btn').addEventListener('click', () => setTheme(isDark() ? 'light' : 'dark'));
+$('#theme-select').addEventListener('change', (e) => setTheme(e.target.value));
+darkQuery?.addEventListener?.('change', () => state.theme === 'auto' && applyTheme());
+
 // ---------- tabs ----------
 
 function showView(name) {
@@ -140,8 +166,8 @@ let routeLayer = null;
 let meMarker = null;
 const markers = new Map();
 
-const COLORS = { hswt: '#79b829', hswtLine: '#4d8a12', residence: '#8a5525', community: '#a05667' };
-const GLYPH = { food: '🍴', transit: 'H', residence: 'WH', community: '✝', service: 'i' };
+const COLORS = { hswt: '#79b829', hswtLine: '#4d8a12', residence: '#8a5525', community: '#a05667', study: '#2f6fb3' };
+const GLYPH = { food: '🍴', transit: 'H', residence: 'WH', community: '✝', service: 'i', study: '📖' };
 
 function initMap() {
   if (!window.L) {
@@ -339,7 +365,7 @@ function selectPlace(placeId, { room = null, personId = null, route = false, kee
   const status = openingStatus(p.hours);
   const title = person ? person.name : room ? t('room.title', { code: room.code }) : i18n.pick(p.name);
   const kind = person ? t(person.url ? 'kind.person' : 'kind.contact') : room ? t('kind.room') : t(`kind.${p.kind}`);
-  const subtitle = person ? i18n.pick(person.field) || i18n.pick(FACULTIES[person.faculty]) || person.note : room ? i18n.pick(p.name) : i18n.pick(p.subtitle) || i18n.pick(p.description);
+  const subtitle = person ? i18n.pick(person.field) || i18n.pick(FACULTIES[person.faculty]) : room ? i18n.pick(p.name) : i18n.pick(p.subtitle) || i18n.pick(p.description);
 
   const roomCode = person?.room ?? room?.code ?? p.room;
   const roomBuilding = building ?? (roomCode ? buildingById(roomCode.split('.')[0]) : null);
@@ -359,11 +385,14 @@ function selectPlace(placeId, { room = null, personId = null, route = false, kee
         : '',
     row(t('sheet.phone'), p.phone ? `<a href="tel:${esc(p.phone.replace(/[^+\d]/g, ''))}">${esc(p.phone)}</a>` : ''),
     row(t('sheet.email'), p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : ''),
+    row(t('sheet.note'), person?.note ? esc(i18n.pick(person.note)) : ''),
   ].join('');
 
   const links = [
     person?.url ? `<a class="btn link" href="${esc(person.url)}" target="_blank" rel="noopener">${esc(t('sheet.profile'))} ↗</a>` : '',
-    !person && p.url ? `<a class="btn link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t('sheet.website'))} ↗</a>` : '',
+    !person && p.url
+      ? `<a class="btn link" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t(/hswt\.de/.test(p.url) ? 'sheet.website' : 'sheet.websiteOther'))} ↗</a>`
+      : '',
   ].join('');
 
   let inside = '';
@@ -564,6 +593,7 @@ let activeIdx = -1;
 const CHIPS = [
   { key: 'chip.mensa', icon: '🍴', place: 'mensa' },
   { key: 'chip.library', icon: '📚', place: 'library' },
+  { key: 'chip.tumLibrary', icon: '📖', place: 'tum-library' },
   { key: 'chip.studentService', icon: '🎓', place: 'student-service' },
   { key: 'chip.cafe', icon: '☕', query: 'StuCafé' },
   { key: 'chip.station', icon: '🚆', query: 'Freising Bahnhof' },
@@ -984,7 +1014,7 @@ function placeItem(p, { badge, status, sub } = {}) {
 function personItem(p) {
   return `<li class="item clickable" data-person="${esc(p.id)}">
     <span class="badge">${esc(p.room.split('.')[0])}</span>
-    <div class="grow"><div class="title">${esc(p.name)}</div><div class="sub">${esc([p.room, i18n.pick(p.field) || p.note].filter(Boolean).join(' · '))}</div></div>
+    <div class="grow"><div class="title">${esc(p.name)}</div><div class="sub">${esc([p.room, i18n.pick(p.field) || i18n.pick(p.note)].filter(Boolean).join(' · '))}</div></div>
   </li>`;
 }
 
@@ -1000,8 +1030,8 @@ function renderCampus() {
     : `<li class="muted small">${esc(t('campus.savedEmpty'))}</li>`;
 
   $('#services-list').innerHTML = state.campus.pois
-    .filter((p) => p.kind === 'service')
-    .map((p) => placeItem(p, { badge: p.building, status: openingStatus(p.hours, now), sub: [p.room, i18n.pick(p.description)].filter(Boolean).join(' · ') }))
+    .filter((p) => p.kind === 'service' || p.kind === 'study')
+    .map((p) => placeItem(p, { badge: p.building ?? GLYPH[p.kind], status: openingStatus(p.hours, now), sub: [p.room, i18n.pick(p.description)].filter(Boolean).join(' · ') }))
     .join('');
   $('#food-list').innerHTML = state.campus.pois
     .filter((p) => p.kind === 'food')
@@ -1088,6 +1118,7 @@ campusSelect.addEventListener('change', () => {
 
 // ---------- boot ----------
 
+applyTheme();
 initMap();
 applyLanguage();
 locate({ quiet: true });

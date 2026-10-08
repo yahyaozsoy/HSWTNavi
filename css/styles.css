@@ -12,19 +12,50 @@
   --radius: 14px;
   --tabbar-h: 64px;
   --topbar-h: 52px;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --primary: #00653a; /* filled buttons: keeps white text at AA contrast in both themes */
+  --tile-filter: none;
   color-scheme: light dark;
 }
 
+/* Dark theme: follows the system unless the user picked one (html[data-theme]). */
+:root[data-theme='dark'] {
+  --bg: #101412;
+  --surface: #1a201d;
+  --text: #e6ebe8;
+  --muted: #9eaba4;
+  --border: #2d3631;
+  --green-light: #193528;
+  --green: #3bb377;
+  --danger: #ff8a80;
+  --warn: #f0b44c;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --primary: #1b7a4b;
+  /* Darken OpenStreetMap tiles; markers, footprints and routes sit above and keep their colours. */
+  --tile-filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
+  color-scheme: dark;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111513;
-    --surface: #1b211e;
-    --text: #e7ece9;
-    --muted: #9aa8a0;
-    --border: #2c3530;
-    --green-light: #183326;
-    --green: #2fa36b;
+  :root:not([data-theme='light']) {
+    --bg: #101412;
+    --surface: #1a201d;
+    --text: #e6ebe8;
+    --muted: #9eaba4;
+    --border: #2d3631;
+    --green-light: #193528;
+    --green: #3bb377;
+    --danger: #ff8a80;
+    --warn: #f0b44c;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --primary: #1b7a4b;
+  --primary: #1b7a4b;
+    /* Darken OpenStreetMap tiles; markers, footprints and routes sit above and keep their colours. */
+    --tile-filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
+    color-scheme: dark;
   }
+}
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 * {
@@ -294,7 +325,7 @@ summary {
   color: var(--green);
 }
 .btn.primary {
-  background: var(--green);
+  background: var(--primary);
   color: #fff;
 }
 .btn.ghost {
@@ -386,7 +417,7 @@ summary {
 }
 .marker.poi {
   border-radius: 50%;
-  background: #fff;
+  background: var(--surface);
   color: var(--green-dark);
   border-color: var(--green);
 }
@@ -798,8 +829,8 @@ h2.flush {
 }
 .day-tabs button[aria-selected='true'],
 .segmented button[aria-pressed='true'] {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--primary);
+  border-color: var(--primary);
   color: #fff;
   font-weight: 700;
 }
@@ -981,4 +1012,57 @@ h2.flush {
   .top-actions .btn {
     min-width: 48px;
   }
+}
+
+/* ---------- theme-aware map chrome ---------- */
+.leaflet-container {
+  background: var(--bg);
+}
+.leaflet-tile-pane {
+  filter: var(--tile-filter);
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface) 85%, transparent) !important;
+  color: var(--muted);
+}
+.leaflet-control-attribution a {
+  color: var(--green);
+}
+.theme-btn {
+  width: 36px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+}
+.settings-row select {
+  font: inherit;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+.sheet,
+.search input,
+.search-results,
+.chip,
+.fab {
+  box-shadow: 0 2px 12px var(--shadow);
 }

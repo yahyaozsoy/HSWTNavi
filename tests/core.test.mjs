@@ -81,6 +81,21 @@ test('every professor office and service points to a mapped building', () => {
   }
 });
 
+test('more professors and the TUM branch library are on the map', () => {
+  assert.ok(ws.people.length >= 45, `${ws.people.length} people`);
+  for (const f of ['BI', 'GL', 'LA', 'NAE', 'WF']) assert.ok(ws.people.filter((p) => p.faculty === f).length >= 5, f);
+  assert.equal(new Set(ws.people.map((p) => p.name)).size, ws.people.length); // no duplicates
+
+  const lib = ws.pois.find((p) => p.id === 'tum-library');
+  assert.equal(lib.kind, 'study');
+  assert.ok(lib.footprints.length > 0);
+  // Right next to the Mensa.
+  assert.ok(distanceMeters(lib.latlng, ws.pois.find((p) => p.id === 'mensa').latlng) < 200);
+  assert.equal(openingStatus(lib.hours, new Date(2026, 9, 10, 12)).open, true); // Saturday noon
+  assert.equal(openingStatus(lib.hours, new Date(2026, 9, 8, 23, 30)).open, true); // Thursday late
+  assert.deepEqual(en.weeklyHours(lib.hours), ['Mon–Fri 08:00–24:00', 'Sat–Sun 10:00–20:00']);
+});
+
 test('walking estimates and nearest place', () => {
   const a8 = ws.buildings.find((b) => b.id === 'A8').latlng;
   const h10 = ws.buildings.find((b) => b.id === 'H10').latlng;
@@ -200,6 +215,10 @@ test('search finds rooms, offices, professors, canteens, stops and own classes',
   assert.equal(find('Hörster')[0].room.code, 'A5.405');
   assert.equal(find('hoerster')[0].room.code, 'A5.405');
   assert.ok(find('waldbau').some((r) => r.title === 'Prof. Dr. Sven Martens'));
+  assert.equal(find('grüner-lempart')[0].room.code, 'A3.617');
+  assert.equal(find('obstbau')[0].title, 'Prof. Dr. Dominikus Kittemann');
+  const libs = find('bibliothek').map((r) => r.placeId);
+  assert.ok(libs.includes('library') && libs.includes('tum-library'));
 
   const own = find('muster')[0];
   assert.equal(own.type, 'contact');

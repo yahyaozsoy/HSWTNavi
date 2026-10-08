@@ -79,6 +79,9 @@ LABEL_OVERRIDES = [
     ((260, 182), None),
 ]
 
+# Non-HSWT buildings worth showing, by their OpenStreetMap name.
+EXTRA_OSM_BUILDINGS = {"tumLibrary": "Teilbibliothek Weihenstephan"}
+
 # Buildings that share one footprint polygon get a marker at their own part (plan pt).
 MARKER_OVERRIDES = {
     "A1": (478.0, 474.5),
@@ -335,6 +338,8 @@ def main(pdf_path, navigatum_dir, out_path, overture_buildings=None):
     else:
         out_hsg = entry([snapped(hsg["poly"])[0]])
     parking = [list(to_ll(place(p))) for p in parking_pts]
+    # Non-HSWT buildings students use, taken straight from OSM by name.
+    extras = {key: entry([named[name]["geom"]], None, "osm") for key, name in EXTRA_OSM_BUILDINGS.items() if name in named}
 
     # Real stop names and coordinates (DELFI GTFS via NavigaTUM), clipped to the plan area.
     corners = [to_ll(T(p)) for p in [(0, 0), (LEGEND_X, 0), (0, 600), (852, 600)]]
@@ -360,6 +365,7 @@ def main(pdf_path, navigatum_dir, out_path, overture_buildings=None):
         "residences": dict(sorted(out_residences.items())),
         "hsg": out_hsg,
         "parking": parking,
+        "extras": extras,
         "stops": sorted(stops, key=lambda s: s["name"]),
     }
     body = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
