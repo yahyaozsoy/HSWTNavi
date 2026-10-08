@@ -1,6 +1,4 @@
-// Opening-hours status ("open – closes 14:00", "closed – opens Mon 08:00").
-
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+// Opening-hours status. Formatting ("Geöffnet · bis 14:00 Uhr") lives in i18n.js.
 
 export function toMinutes(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
@@ -24,17 +22,9 @@ export function openingStatus(hours, now = new Date()) {
     const ranges = [...(hours[d] ?? [])].sort((a, b) => toMinutes(a[0]) - toMinutes(b[0]));
     for (const [start] of ranges) {
       if (offset > 0 || toMinutes(start) > minute) {
-        const when = offset === 0 ? 'today' : offset === 1 ? 'tomorrow' : DAY_NAMES[d];
-        return { known: true, open: false, opensAt: start, opensDay: when };
+        return { known: true, open: false, opensAt: start, opensDay: d, opensIn: offset };
       }
     }
   }
   return { known: true, open: false };
-}
-
-export function describeStatus(status) {
-  if (!status.known) return '';
-  if (status.open) return `Open · closes ${status.closesAt}`;
-  if (status.opensAt) return `Closed · opens ${status.opensDay} ${status.opensAt}`;
-  return 'Closed';
 }

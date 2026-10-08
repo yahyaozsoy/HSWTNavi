@@ -1,11 +1,15 @@
 // Offline support: app shell is cache-first, everything else network-first.
-const CACHE = 'hswt-navigator-v1';
+const CACHE = 'hswt-navigator-v2';
 const SHELL = [
   './',
   'index.html',
   'css/styles.css',
   'js/app.js',
   'js/data/campus.js',
+  'js/data/weihenstephan.generated.js',
+  'js/lib/i18n.js',
+  'js/lib/directions.js',
+  'js/lib/mensa.js',
   'js/lib/rooms.js',
   'js/lib/routing.js',
   'js/lib/hours.js',
@@ -52,10 +56,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Routing and menu APIs go straight to the network; the app has its own fallbacks.
+  if (url.origin !== location.origin && url.hostname !== 'unpkg.com') return;
+
   event.respondWith(
     fetch(event.request)
       .then((res) => {
-        if (res.ok && url.origin === location.origin) caches.open(CACHE).then((c) => c.put(event.request, res.clone()));
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(event.request, copy));
+        }
         return res;
       })
       .catch(() => caches.match(event.request).then((r) => r ?? caches.match('index.html'))),

@@ -1,69 +1,92 @@
 # HSWT Navigator
 
 For campus members who have no idea where they're heading, **HSWT Navigator** is a mobile/web app
-that helps them find their way around the campuses of Hochschule Weihenstephan-Triesdorf.
-Unlike Google Maps, it's built into daily campus life: it knows your timetable, room codes,
-step-free paths and when the Mensa closes.
+that helps them find their way around the Weihenstephan campus of Hochschule Weihenstephan-Triesdorf.
+Unlike Google Maps, it's built into daily campus life: it knows HSWT building codes and room numbers,
+your timetable, today's Mensa menu and when to leave for your next class. The interface is in
+**German and English**.
 
 ## Features
 
 | | |
 |---|---|
-| **Room search** | Type a room code the way it's printed on the door (`D2.04`, `B 0.01`, `C-1.12`, `AEG.3`) and see the building and floor. Also searches buildings, services, German/English aliases (*Bibliothek*, *Gewächshaus*, *Audimax*) and your own classes. |
-| **Next class** | The *Today* tab shows your current or next class, which room it's in, how long the walk is and **when to leave**. Tap *Navigate* to get the route. |
-| **Timetable import** | Import an `.ics` export (weekly `RRULE`s, one-off events like exams) or add classes by hand. All data stays on the device (`localStorage`). |
-| **Campus routing** | Walking routes on a campus path graph, starting from your GPS position (snapped to the nearest path) or any building. |
-| **Step-free mode** | Routes that avoid stairs, plus warnings for buildings whose upper floors aren't step-free. |
-| **Open now** | Live opening status for the Mensa, cafeteria and library ("Open · closes 14:00", "Closed · opens Mon 11:00"). |
-| **Multi-campus** | Weihenstephan (Freising) and Triesdorf, switchable in the header. |
-| **Deep links** | `?q=D2.04` opens a room directly, e.g. from a QR code on a door sign or a link in a calendar invite. |
-| **Installable & offline** | PWA with a service worker; the app shell and map tiles you've already viewed keep working on patchy campus Wi-Fi. |
+| **Real campus map** | All HSWT buildings from the official site plan (A1–A11, C4–C6, D1, F9/F10, H1–H21), residences, HSG, car parks and bus stops, drawn as real footprints on OpenStreetMap. |
+| **Room search** | Type a room as printed on the door (`A6 1.12`, `H10.E.07`, `C4-1.03`, `D1 U.04`) or a plain building code. Searches services from the plan legend (*Studienberatung*, *Bibliothek*, *International Office*, *Sprachenzentrum*, dean's offices), canteens, stops and your own classes, in German or English. |
+| **Real walking routes** | Turn-by-turn directions in German or English from FOSSGIS Valhalla, starting at your GPS position, Freising station or any building. Falls back to OSRM, then to an offline estimate. |
+| **Step-free mode** | Requests Valhalla's wheelchair profile, which avoids stairs. |
+| **Next class** | The *Heute/Today* tab shows your current or next class, room, floor, walking time and **when to leave**. *Navigieren* opens the route. |
+| **Timetable import** | Import an `.ics` export (weekly `RRULE`s, one-off exams) or add classes by hand. Stays on the device. |
+| **Mensa** | Opening status for Mensa Weihenstephan and both StuCafés, plus today's menu (prices, vegan/vegetarian labels) from the open eat-api. |
+| **Deep links** | `?q=A6%201.12` opens a room directly, e.g. from a QR code on a door sign or a calendar invite. |
+| **Installable & offline** | PWA: the app shell and map tiles you've seen keep working on patchy campus Wi-Fi. |
 
 ## Run it
 
-No build step and no dependencies. Leaflet and OpenStreetMap tiles load from a CDN.
+No build step, no dependencies.
 
 ```bash
 npm start        # serves on http://localhost:8080 (python3 -m http.server)
 npm test         # unit tests with Node's built-in test runner (Node 18+)
 ```
 
-Open the site on a phone and choose *Add to Home Screen* to install it.
+## Where the data comes from
+
+| Data | Source |
+|---|---|
+| Building codes, footprints, residences, HSG, car parks | Official HSWT *Lageplan Weihenstephan* (PDF), converted by `tools/build_campus_data.py` |
+| Georeferencing of the plan | 72 plan buildings matched to the surveyed coordinates in [NavigaTUM](https://github.com/TUM-Dev/NavigaTUM) (TUM shares the hill). Median error **5.3 m**, RMS 8.6 m. Cross-checks: HSG 3 m, Freising station 3 m. |
+| Bus stops | DELFI/MVV public-transport data (via NavigaTUM) |
+| Canteen locations, hours, menus | Studierendenwerk München Oberbayern via [TUM-Dev eat-api](https://github.com/TUM-Dev/eat-api) |
+| Base map | © OpenStreetMap contributors (`tile.openstreetmap.org`) |
+| Walking routes | [FOSSGIS Valhalla](https://valhalla1.openstreetmap.de) and [FOSSGIS OSRM](https://routing.openstreetmap.de), on OpenStreetMap data |
+
+All of these are free, need no API key and are the same services openstreetmap.org uses. They're
+meant for light use, so for a large rollout, self-host Valhalla or switch the URLs in
+`js/lib/directions.js` to a keyed provider.
+
+### Updating the campus data
+
+If HSWT publishes a new site plan:
+
+```bash
+pip install pymupdf numpy shapely pandas pyarrow
+git clone --depth 1 --filter=blob:limit=5m --sparse https://github.com/TUM-Dev/NavigaTUM
+(cd NavigaTUM && git sparse-checkout set data/external/results)
+python3 tools/build_campus_data.py lageplan-weihenstephan.pdf NavigaTUM/data/external/results
+npm test
+```
+
+The script prints the georeferencing quality. Footprints that share one polygon or have no code on
+the plan are handled in `LABEL_OVERRIDES` / `MARKER_OVERRIDES` at the top of the script. Text
+from the plan's legend (dean's offices, services) and the canteens lives in `js/data/campus.js`.
 
 ## Project layout
 
 ```
-index.html              App shell (Map / Today / Campus tabs)
-css/styles.css          Mobile-first styles, dark mode
-js/app.js               UI controller (map, search, sheet, timetable, settings)
-js/data/campus.js       Campus data: path graph, buildings, services, opening hours
-js/lib/rooms.js         Room-code parsing ("D2.04" → building D, 2nd floor)
-js/lib/routing.js       Distance, Dijkstra routing, stairs avoidance, walk times
-js/lib/schedule.js      Next class, leave-by time, .ics import
-js/lib/hours.js         Opening-hours status
-js/lib/search.js        Ranked search with umlaut-tolerant matching
-sw.js                   Offline caching
-tests/core.test.mjs     Unit tests for all of js/lib and the campus data
+index.html                         App shell (Karte / Heute / Campus)
+css/styles.css                     Mobile-first styles, dark mode
+js/app.js                          UI controller
+js/data/campus.js                  Legend info, canteens, places
+js/data/weihenstephan.generated.js Georeferenced plan data (generated)
+js/lib/i18n.js                     German/English strings and formatting
+js/lib/rooms.js                    Room-code parsing ("A6 1.12" → A6, 1st floor)
+js/lib/directions.js               Valhalla / OSRM client with fallbacks
+js/lib/mensa.js                    eat-api menu URLs and parsing
+js/lib/routing.js                  Distances and walking-time estimates
+js/lib/schedule.js                 Next class, leave-by time, .ics import
+js/lib/hours.js                    Opening-hours status
+js/lib/search.js                   Ranked, umlaut-tolerant search
+tools/build_campus_data.py         Site plan → georeferenced JS data
+sw.js                              Offline caching
+tests/                             Unit tests
 ```
 
-## Campus data
+## Known limits
 
-All map content is in [`js/data/campus.js`](js/data/campus.js). **The current coordinates, building
-letters and opening hours are seed data** used for development. Check them against the official HSWT
-site plans before a public release. To add a building:
-
-1. Add an entrance node to `nodes` (`id: [lat, lng]`).
-2. Connect it to the path network in `edges` (mark staircases with `{ stairs: true }`).
-3. Add an entry to `buildings` (or `pois` for services) that points to that node.
-
-The tests check that every place has a node and that every node can be reached, so a broken graph
-fails `npm test`.
-
-## Roadmap ideas
-
-- Indoor floor plans for each building (room-level routing, elevators)
-- Live Mensa menus from the Studierendenwerk
-- Direct PRIMUSS timetable sync and room-change notifications
-- Live bus/train departures at the campus stops
-- Free-room finder for study spaces
-- German UI translation
+- The plan has no room numbers and no floor plans, so a room resolves to its building and floor
+  but routes end at the building, not at the door.
+- Step-free routing is only as good as OpenStreetMap's tagging of steps and kerbs on campus.
+- Only the Weihenstephan campus is mapped. The data model supports more campuses (the header shows
+  a campus switcher once a second one is added). Triesdorf needs its own site plan.
+- The plan has no names for some smaller HSWT buildings (light green on the map) and for some
+  gastronomy symbols, so they are shown but not searchable.

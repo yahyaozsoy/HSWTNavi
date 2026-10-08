@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#00653a" />
-    <meta name="description" content="Find rooms, your next class and campus services at HSWT." />
+    <meta name="description" content="Räume, deine nächste Vorlesung und Campus-Services der HSWT finden." />
     <title>HSWT Navigator</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
@@ -21,109 +21,103 @@
     <header class="topbar">
       <div class="brand">
         <img src="icons/icon.svg" alt="" width="28" height="28" />
-        <span>HSWT Navigator</span>
+        <span data-i18n="app.title">HSWT Navigator</span>
       </div>
-      <label class="campus-select">
-        <span class="visually-hidden">Campus</span>
-        <select id="campus-select"></select>
-      </label>
+      <div class="topbar-actions">
+        <label class="campus-select" hidden>
+          <span class="visually-hidden">Campus</span>
+          <select id="campus-select"></select>
+        </label>
+        <div class="lang-switch" role="group" data-i18n-aria="settings.language">
+          <button type="button" data-lang="de" lang="de">DE</button>
+          <button type="button" data-lang="en" lang="en">EN</button>
+        </div>
+      </div>
     </header>
 
     <main>
       <!-- MAP -->
-      <section id="view-map" class="view active" aria-label="Map">
+      <section id="view-map" class="view active" data-i18n-aria="tab.map">
         <div class="search">
           <input
             id="search-input"
             type="search"
-            placeholder="Room (e.g. D2.04), building, Mensa, your class…"
             autocomplete="off"
-            aria-label="Search campus"
+            data-i18n-placeholder="search.placeholder"
+            data-i18n-aria="search.label"
           />
           <ul id="search-results" class="search-results" role="listbox" hidden></ul>
         </div>
-        <div id="map" role="application" aria-label="Campus map"></div>
-        <button id="locate-btn" class="fab" title="Show my location" aria-label="Show my location">◎</button>
+        <div id="map" role="application" data-i18n-aria="tab.map"></div>
+        <button id="locate-btn" class="fab" data-i18n-title="locate.title" data-i18n-aria="locate.title">◎</button>
 
         <div id="sheet" class="sheet" hidden>
-          <button id="sheet-close" class="sheet-close" aria-label="Close">×</button>
+          <button id="sheet-close" class="sheet-close" data-i18n-aria="close">×</button>
           <div id="sheet-body"></div>
         </div>
       </section>
 
       <!-- TODAY -->
-      <section id="view-today" class="view" aria-label="Today">
+      <section id="view-today" class="view" data-i18n-aria="tab.today">
         <div id="next-card" class="card next-card"></div>
-        <h2>Today</h2>
+        <h2 data-i18n="today.heading"></h2>
         <ul id="today-list" class="list"></ul>
 
-        <h2>My timetable</h2>
+        <h2 data-i18n="timetable.heading"></h2>
         <ul id="timetable-list" class="list"></ul>
 
         <details class="card">
-          <summary>Add a class</summary>
+          <summary data-i18n="form.add"></summary>
           <form id="class-form" class="form">
-            <label>Course <input name="title" required placeholder="Statistics" /></label>
-            <label>Room <input name="room" placeholder="D2.04" /></label>
-            <label
-              >Day
-              <select name="day">
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-              </select>
-            </label>
+            <label><span data-i18n="form.course"></span> <input name="title" required /></label>
+            <label><span data-i18n="form.room"></span> <input name="room" placeholder="A6 1.12" /></label>
+            <label><span data-i18n="form.day"></span> <select name="day" id="day-select"></select></label>
             <div class="row">
-              <label>From <input name="start" type="time" required value="08:15" /></label>
-              <label>To <input name="end" type="time" required value="09:45" /></label>
+              <label><span data-i18n="form.from"></span> <input name="start" type="time" required value="08:15" /></label>
+              <label><span data-i18n="form.to"></span> <input name="end" type="time" required value="09:45" /></label>
             </div>
-            <button type="submit" class="btn primary">Add class</button>
+            <button type="submit" class="btn primary" data-i18n="form.submit"></button>
           </form>
         </details>
 
         <details class="card">
-          <summary>Import timetable (.ics)</summary>
-          <p class="muted">
-            Export your timetable as an iCalendar file from PRIMUSS / your calendar app and import it here.
-            Everything stays on this device.
-          </p>
+          <summary data-i18n="ics.heading"></summary>
+          <p class="muted" data-i18n="ics.help"></p>
           <input id="ics-input" type="file" accept=".ics,text/calendar" />
           <p id="ics-status" class="muted" role="status"></p>
         </details>
       </section>
 
       <!-- CAMPUS -->
-      <section id="view-campus" class="view" aria-label="Campus services">
-        <h2>Open now</h2>
+      <section id="view-campus" class="view" data-i18n-aria="tab.campus">
+        <h2 data-i18n="campus.openNow"></h2>
+        <ul id="food-list" class="list"></ul>
+
+        <h2 data-i18n="campus.services"></h2>
         <ul id="services-list" class="list"></ul>
 
-        <h2>Buildings</h2>
-        <ul id="buildings-list" class="list"></ul>
+        <h2 data-i18n="campus.buildings"></h2>
+        <ul id="buildings-list" class="list compact"></ul>
 
-        <h2>Settings</h2>
+        <h2 data-i18n="campus.settings"></h2>
         <div class="card">
           <label class="switch">
             <input id="avoid-stairs" type="checkbox" />
-            <span>Step-free routes (avoid stairs)</span>
+            <span data-i18n="settings.stepFree"></span>
           </label>
           <label class="switch">
             <input id="buffer-min" type="number" min="0" max="30" value="3" />
-            <span>Minutes to arrive early</span>
+            <span data-i18n="settings.buffer"></span>
           </label>
         </div>
-        <p class="muted small">
-          Map data © OpenStreetMap contributors. Campus layout is seed data – verify against official HSWT site plans.
-        </p>
+        <p id="about-data" class="muted small"></p>
       </section>
     </main>
 
-    <nav class="tabbar" aria-label="Main">
-      <button data-view="map" class="active"><span aria-hidden="true">⌖</span>Map</button>
-      <button data-view="today"><span aria-hidden="true">◷</span>Today</button>
-      <button data-view="campus"><span aria-hidden="true">☰</span>Campus</button>
+    <nav class="tabbar">
+      <button data-view="map" class="active"><span aria-hidden="true">⌖</span><b data-i18n="tab.map"></b></button>
+      <button data-view="today"><span aria-hidden="true">◷</span><b data-i18n="tab.today"></b></button>
+      <button data-view="campus"><span aria-hidden="true">☰</span><b data-i18n="tab.campus"></b></button>
     </nav>
 
     <script
