@@ -462,3 +462,131 @@ summary {
     left: 12px;
   }
 }
+
+/* Header actions & language switch */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lang-switch {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.lang-switch button {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+.lang-switch button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--green-dark);
+}
+.tabbar button b {
+  font-weight: inherit;
+}
+
+/* Compact building grid */
+.list.compact {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+.list.compact .item {
+  padding: 8px 10px;
+}
+
+/* Small map markers for stops and parking */
+.marker.stop {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffdd00;
+  color: #10662e;
+  border: 2px solid #10662e;
+  font-size: 0.65rem;
+}
+.marker.parking {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #365ca7;
+  border: 1px solid #fff;
+  font-size: 0.65rem;
+}
+.marker.residence {
+  background: #8a5525;
+}
+.marker.service {
+  background: #a05667;
+}
+.code-label {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--green-dark);
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff;
+}
+.leaflet-tooltip.code-label::before {
+  display: none;
+}
+
+/* Directions & menu in the sheet */
+.steps {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+.steps li {
+  margin: 4px 0;
+}
+.steps .muted {
+  white-space: nowrap;
+}
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+.menu .price {
+  color: var(--muted);
+  white-space: nowrap;
+}
+.menu li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sheet h4 {
+  margin: 14px 0 4px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.marker.poi.residence,
+.marker.poi.service {
+  color: #fff;
+  border-color: #fff;
+  font-size: 0.7rem;
+}
+.marker.poi.food {
+  font-size: 0.9rem;
+}
+.zoomed-out .marker.stop,
+.zoomed-out .marker.parking {
+  display: none;
+}
+.zoomed-out .marker:not(.me):not(.selected) {
+  transform: scale(0.75);
+}

@@ -1,7 +1,8 @@
 {
   "name": "HSWT Navigator",
   "short_name": "HSWT Navi",
-  "description": "Find rooms, your next class and campus services at Hochschule Weihenstephan-Triesdorf.",
+  "description": "Räume, deine nächste Vorlesung und Campus-Services der HSWT finden.",
+  "lang": "de",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

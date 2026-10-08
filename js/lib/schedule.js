@@ -49,17 +49,6 @@ export function leaveBy(startsAt, walkMinutes, bufferMin = 3) {
   return new Date(startsAt.getTime() - (walkMinutes + bufferMin) * 60000);
 }
 
-export function formatCountdown(ms) {
-  const totalMin = Math.round(ms / 60000);
-  if (totalMin <= 0) return 'now';
-  if (totalMin < 60) return `in ${totalMin} min`;
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  if (h < 24) return m ? `in ${h} h ${m} min` : `in ${h} h`;
-  const days = Math.round(h / 24);
-  return days === 1 ? 'tomorrow' : `in ${days} days`;
-}
-
 // ---------- iCalendar (.ics) import ----------
 
 const ICS_DAYS = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
